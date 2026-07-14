@@ -7,10 +7,10 @@ void InputManager::update() {
 
     // Poll current keyboard state for commonly used keys
     static const sf::Keyboard::Key trackedKeys[] = {
-        sf::Keyboard::W, sf::Keyboard::A, sf::Keyboard::S, sf::Keyboard::D,
-        sf::Keyboard::R, sf::Keyboard::E, sf::Keyboard::F, sf::Keyboard::Q,
-        sf::Keyboard::Num1, sf::Keyboard::Num2, sf::Keyboard::Num3, sf::Keyboard::Num4,
-        sf::Keyboard::Escape, sf::Keyboard::Space, sf::Keyboard::LShift, sf::Keyboard::Tab
+        sf::Keyboard::Key::W, sf::Keyboard::Key::A, sf::Keyboard::Key::S, sf::Keyboard::Key::D,
+        sf::Keyboard::Key::R, sf::Keyboard::Key::E, sf::Keyboard::Key::F, sf::Keyboard::Key::Q,
+        sf::Keyboard::Key::Num1, sf::Keyboard::Key::Num2, sf::Keyboard::Key::Num3, sf::Keyboard::Key::Num4,
+        sf::Keyboard::Key::Escape, sf::Keyboard::Key::Space, sf::Keyboard::Key::LShift, sf::Keyboard::Key::Tab
     };
 
     for (auto key : trackedKeys) {
@@ -18,9 +18,9 @@ void InputManager::update() {
     }
 
     // Poll mouse buttons
-    currentMouseButtons[static_cast<int>(sf::Mouse::Left)] = sf::Mouse::isButtonPressed(sf::Mouse::Left);
-    currentMouseButtons[static_cast<int>(sf::Mouse::Right)] = sf::Mouse::isButtonPressed(sf::Mouse::Right);
-    currentMouseButtons[static_cast<int>(sf::Mouse::Middle)] = sf::Mouse::isButtonPressed(sf::Mouse::Middle);
+    currentMouseButtons[static_cast<int>(sf::Mouse::Button::Left)] = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
+    currentMouseButtons[static_cast<int>(sf::Mouse::Button::Right)] = sf::Mouse::isButtonPressed(sf::Mouse::Button::Right);
+    currentMouseButtons[static_cast<int>(sf::Mouse::Button::Middle)] = sf::Mouse::isButtonPressed(sf::Mouse::Button::Middle);
 }
 
 bool InputManager::isKeyPressed(sf::Keyboard::Key key) const {

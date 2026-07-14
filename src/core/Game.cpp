@@ -2,7 +2,7 @@
 #include <iostream>
 
 Game::Game()
-    : window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Zombie Don't Kill Me", sf::Style::Close | sf::Style::Titlebar)
+    : window(sf::VideoMode({WINDOW_WIDTH, WINDOW_HEIGHT}), "Zombie Don't Kill Me", sf::Style::Close | sf::Style::Titlebar)
 {
     window.setFramerateLimit(0); // We handle timing ourselves
     window.setVerticalSyncEnabled(false);
@@ -48,14 +48,13 @@ void Game::run() {
 }
 
 void Game::processEvents() {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
+    while (const std::optional<sf::Event> event = window.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) {
             window.close();
             return;
         }
 
-        stateManager.handleEvent(event);
+        stateManager.handleEvent(*event);
     }
 }
 

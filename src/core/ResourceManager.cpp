@@ -40,7 +40,7 @@ sf::Font& ResourceManager::loadFont(const std::string& id, const std::string& fi
     }
 
     sf::Font font;
-    if (!font.loadFromFile(filepath)) {
+    if (!font.openFromFile(filepath)) {
         throw std::runtime_error("[ResourceManager] Failed to load font: " + filepath);
     }
 

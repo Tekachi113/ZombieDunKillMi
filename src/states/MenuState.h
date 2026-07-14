@@ -13,15 +13,14 @@ public:
     void onEnter() override;
 
 private:
-    // Title
-    sf::Text titleText;
-    sf::Text subtitleText;
-    sf::Text startText;
-    sf::Text quitText;
     sf::Font font;
+    std::optional<sf::Text> titleText;
+    std::optional<sf::Text> subtitleText;
+    std::optional<sf::Text> startText;
+    std::optional<sf::Text> quitText;
 
     // Animated zombie sprite for the background
-    sf::Sprite zombieSprite;
+    std::optional<sf::Sprite> zombieSprite;
     std::vector<sf::Texture> zombieFrames;
     int currentFrame = 0;
     float animTimer = 0.f;

@@ -11,7 +11,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 # Add dependencies
-find_package(SFML 2.6 COMPONENTS graphics window system audio REQUIRED)
+find_package(SFML REQUIRED COMPONENTS Graphics Window System Audio)
 find_package(glm CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
@@ -43,10 +43,10 @@ target_compile_definitions(ZombieDontKillMe PRIVATE
 
 # Automatically links to these libs
 target_link_libraries(ZombieDontKillMe PRIVATE
-    sfml-graphics
-    sfml-window
-    sfml-system
-    sfml-audio
+    SFML::Graphics
+    SFML::Window
+    SFML::System
+    SFML::Audio
     glm::glm
     nlohmann_json::nlohmann_json
 )
