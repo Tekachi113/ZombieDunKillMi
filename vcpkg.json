@@ -1,0 +1,10 @@
+{
+  "name": "zombie-dont-kill-me",
+  "version": "1.0.0",
+  "builtin-baseline": "b5229343b4b80264ed51e89c6a7dcd0cbe85e9cc",
+  "dependencies": [
+    "sfml",
+    "glm",
+    "nlohmann-json"
+  ]
+}

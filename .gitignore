@@ -1,0 +1,6 @@
+build/
+__MACOSX/
+.DS_Store
+.vscode/
+.vs/
+*.exe
