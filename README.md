@@ -28,7 +28,7 @@ Fight off increasingly dangerous waves of zombies, scavenge supplies, trade with
 ## 🛠️ Tech Stack
 
 - **Language:** C++17/20
-- **Graphics/Audio:** [SFML 2.6](https://www.sfml-dev.org/)
+- **Graphics/Audio:** SFML 3.0
 - **Math:** GLM
 - **Serialization:** nlohmann/json (level data, save files)
 - **Build system:** CMake
@@ -88,7 +88,7 @@ ZombieDontKillMe/
 
 - CMake >= 3.16
 - A C++20-compatible compiler (GCC, Clang, or MSVC)
-- SFML 2.6 (installed via package manager or vcpkg)
+- SFML 3.0 (installed via package manager or vcpkg)
 
 ### Build
 
