@@ -34,7 +34,7 @@ What it provides, and how it maps onto this design:
 
 | Purpose | Recommended Library | Notes |
 |---|---|---|
-| Graphics / Windowing | **SFML 2.6** | Simplest 2D API, great for a top-down shooter. Alternative: SDL2 + SDL_image if you want lower-level control |
+| Graphics / Windowing | **SFML 3.0** | Simplest 2D API, great for a top-down shooter. Alternative: SDL2 + SDL_image if you want lower-level control |
 | Physics / Collision | **Box2D** (optional) or custom AABB/circle collision | Box2D is overkill for pure top-down but great for knockback, ragdolls, destructible props |
 | Audio | SFML Audio module (or **FMOD**/**OpenAL** if you want 3D positional sound) | |
 | UI / Debug overlay | **Dear ImGui** | For debug menus, tuning values live, level editor tools |
@@ -687,7 +687,7 @@ project(ZombieDontKillMe)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(SFML 2.6 COMPONENTS graphics window system audio REQUIRED)
+find_package(SFML 3.0 COMPONENTS graphics window system audio REQUIRED)
 
 file(GLOB_RECURSE SOURCES src/*.cpp)
 add_executable(${PROJECT_NAME} ${SOURCES})

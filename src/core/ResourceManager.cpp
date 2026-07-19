@@ -10,7 +10,7 @@ sf::Texture& ResourceManager::loadTexture(const std::string& id, const std::stri
 
     sf::Texture texture;
     if (!texture.loadFromFile(filepath)) {
-        throw std::runtime_error("[ResourceManager] Failed to load texture: " + filepath);
+        throw std::runtime_error(std::string("[ResourceManager] Failed to load texture: ") + filepath);
     }
 
     // Pixel art: keep edges crisp, no smoothing
@@ -24,7 +24,7 @@ sf::Texture& ResourceManager::loadTexture(const std::string& id, const std::stri
 sf::Texture& ResourceManager::getTexture(const std::string& id) {
     auto it = textures.find(id);
     if (it == textures.end()) {
-        throw std::runtime_error("[ResourceManager] Texture not found: " + id);
+        throw std::runtime_error(std::string("[ResourceManager] Texture not found: ") + id);
     }
     return it->second;
 }
@@ -41,7 +41,7 @@ sf::Font& ResourceManager::loadFont(const std::string& id, const std::string& fi
 
     sf::Font font;
     if (!font.openFromFile(filepath)) {
-        throw std::runtime_error("[ResourceManager] Failed to load font: " + filepath);
+        throw std::runtime_error(std::string("[ResourceManager] Failed to load font: ") + filepath);
     }
 
     auto [inserted, success] = fonts.emplace(id, std::move(font));
@@ -52,7 +52,7 @@ sf::Font& ResourceManager::loadFont(const std::string& id, const std::string& fi
 sf::Font& ResourceManager::getFont(const std::string& id) {
     auto it = fonts.find(id);
     if (it == fonts.end()) {
-        throw std::runtime_error("[ResourceManager] Font not found: " + id);
+        throw std::runtime_error(std::string("[ResourceManager] Font not found: ") + id);
     }
     return it->second;
 }
@@ -69,7 +69,7 @@ sf::SoundBuffer& ResourceManager::loadSoundBuffer(const std::string& id, const s
 
     sf::SoundBuffer buffer;
     if (!buffer.loadFromFile(filepath)) {
-        throw std::runtime_error("[ResourceManager] Failed to load sound: " + filepath);
+        throw std::runtime_error(std::string("[ResourceManager] Failed to load sound: ") + filepath);
     }
 
     auto [inserted, success] = soundBuffers.emplace(id, std::move(buffer));
@@ -80,7 +80,7 @@ sf::SoundBuffer& ResourceManager::loadSoundBuffer(const std::string& id, const s
 sf::SoundBuffer& ResourceManager::getSoundBuffer(const std::string& id) {
     auto it = soundBuffers.find(id);
     if (it == soundBuffers.end()) {
-        throw std::runtime_error("[ResourceManager] SoundBuffer not found: " + id);
+        throw std::runtime_error(std::string("[ResourceManager] SoundBuffer not found: ") + id);
     }
     return it->second;
 }
