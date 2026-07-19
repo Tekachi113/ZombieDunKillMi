@@ -38,7 +38,7 @@ target_include_directories(ZombieDontKillMe PRIVATE
 
 # Preprocessor defines
 target_compile_definitions(ZombieDontKillMe PRIVATE
-    MY_TEST_DEFINE
+    # Add build-time defines here if needed
 )
 
 # Automatically links to these libs
