@@ -1,0 +1,43 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "mingw-debug",
+      "displayName": "MinGW Debug (LLVM-MinGW + vcpkg)",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE":        "Debug",
+        "CMAKE_TOOLCHAIN_FILE":    "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake",
+        "VCPKG_TARGET_TRIPLET":    "x64-mingw-dynamic",
+        "CMAKE_C_COMPILER":        "C:/Users/nguyen thanh dat/AppData/Local/Microsoft/WinGet/Packages/MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/llvm-mingw-20260602-ucrt-x86_64/bin/clang.exe",
+        "CMAKE_CXX_COMPILER":      "C:/Users/nguyen thanh dat/AppData/Local/Microsoft/WinGet/Packages/MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/llvm-mingw-20260602-ucrt-x86_64/bin/clang++.exe",
+        "CMAKE_MAKE_PROGRAM":      "C:/Users/nguyen thanh dat/AppData/Local/Microsoft/WinGet/Packages/MartinStorsjo.LLVM-MinGW.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/llvm-mingw-20260602-ucrt-x86_64/bin/mingw32-make.exe"
+      },
+      "environment": {
+        "VCPKG_DEFAULT_TRIPLET":      "x64-mingw-dynamic",
+        "VCPKG_DEFAULT_HOST_TRIPLET": "x64-mingw-dynamic"
+      }
+    },
+    {
+      "name": "mingw-release",
+      "displayName": "MinGW Release (LLVM-MinGW + vcpkg)",
+      "inherits": "mingw-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "mingw-debug-build",
+      "configurePreset": "mingw-debug",
+      "displayName": "Build Debug"
+    },
+    {
+      "name": "mingw-release-build",
+      "configurePreset": "mingw-release",
+      "displayName": "Build Release"
+    }
+  ]
+}

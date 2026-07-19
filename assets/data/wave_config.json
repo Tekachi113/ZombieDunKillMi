@@ -1,0 +1,78 @@
+{
+  "waves": [
+    {
+      "wave":          1,
+      "spawnInterval": 2.0,
+      "zombies": [
+        { "type": "small",  "count": 5 }
+      ]
+    },
+    {
+      "wave":          2,
+      "spawnInterval": 1.8,
+      "zombies": [
+        { "type": "small",  "count": 6 },
+        { "type": "medium", "count": 2 }
+      ]
+    },
+    {
+      "wave":          3,
+      "spawnInterval": 1.6,
+      "zombies": [
+        { "type": "small",  "count": 5 },
+        { "type": "medium", "count": 3 },
+        { "type": "turret", "count": 1 }
+      ]
+    },
+    {
+      "wave":          4,
+      "spawnInterval": 1.4,
+      "zombies": [
+        { "type": "small",  "count": 6 },
+        { "type": "medium", "count": 4 },
+        { "type": "big",    "count": 1 },
+        { "type": "turret", "count": 1 }
+      ]
+    },
+    {
+      "wave":          5,
+      "spawnInterval": 1.2,
+      "zombies": [
+        { "type": "small",  "count": 8 },
+        { "type": "medium", "count": 5 },
+        { "type": "big",    "count": 2 },
+        { "type": "turret", "count": 2 }
+      ]
+    },
+    {
+      "wave":          6,
+      "spawnInterval": 1.0,
+      "zombies": [
+        { "type": "small",  "count": 10 },
+        { "type": "medium", "count": 6 },
+        { "type": "big",    "count": 3 },
+        { "type": "turret", "count": 2 }
+      ]
+    },
+    {
+      "wave":          7,
+      "spawnInterval": 0.9,
+      "zombies": [
+        { "type": "small",  "count": 12 },
+        { "type": "medium", "count": 8 },
+        { "type": "big",    "count": 4 },
+        { "type": "turret", "count": 3 }
+      ]
+    },
+    {
+      "wave":          8,
+      "spawnInterval": 0.8,
+      "zombies": [
+        { "type": "small",  "count": 15 },
+        { "type": "medium", "count": 10 },
+        { "type": "big",    "count": 5 },
+        { "type": "turret", "count": 4 }
+      ]
+    }
+  ]
+}
