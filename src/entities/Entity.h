@@ -1,10 +1,6 @@
 #pragma once
-<<<<<<< HEAD
 
 #include <SFML/Graphics.hpp>
-
-// Forward declarations
-class ResourceManager;
 
 // =========================================================
 //  Entity — base class for every live object in the world
@@ -24,8 +20,8 @@ public:
     // Health / damage
     virtual void takeDamage(float amount);
     virtual void onDeath() {}
-    bool isAlive() const { return alive; }
-    float getHealth() const { return health; }
+    bool  isAlive()      const { return alive; }
+    float getHealth()    const { return health; }
     float getMaxHealth() const { return maxHealth; }
 
     // Position helpers
@@ -44,5 +40,3 @@ protected:
     float maxHealth = 100.f;
     bool  alive     = true;
 };
-=======
->>>>>>> bea2a1f88c2f1dfa6438e88ebd05269171c73a78

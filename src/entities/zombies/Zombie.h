@@ -1,11 +1,10 @@
 #pragma once
-<<<<<<< HEAD
 
 #include "../Entity.h"
 #include <SFML/Graphics.hpp>
 
 // =========================================================
-//  Zombie — base stub (full implementation: Person B)
+//  Zombie — base class for all zombie types
 // =========================================================
 class Zombie : public Entity {
 public:
@@ -28,12 +27,12 @@ protected:
     int   xpReward    = 10;
     int   moneyReward = 2;
     float attackTimer = 0.f;
-    float attackRate  = 1.f;   // attacks per second
+    float attackRate  = 1.f;
 
     static constexpr float RADIUS = 14.f;
 };
 
-// ---- Subclass stubs (full impl: Person B) ----
+// ---- Subclasses ----
 
 class SmallZombie : public Zombie {
 public:
@@ -59,5 +58,3 @@ protected:
     float spitCooldown   = 2.5f;
     float preferredRange = 250.f;
 };
-=======
->>>>>>> bea2a1f88c2f1dfa6438e88ebd05269171c73a78

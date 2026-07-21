@@ -1,40 +1,64 @@
 #pragma once
-<<<<<<< HEAD
 
 #include "Entity.h"
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include <string>
 
-// Forward declarations
-class ResourceManager;
+class InputManager;
 
 // =========================================================
-//  Player — stub header (full implementation: Person B)
+//  Player — top-down WASD movement, mouse-aim
 // =========================================================
 class Player : public Entity {
 public:
-    explicit Player(sf::Vector2f pos = {0.f, 0.f});
+    explicit Player(sf::Vector2f pos = {400.f, 300.f});
+
+    // Call every frame from PlayState, BEFORE update()
+    void handleInput(const InputManager& input, float dt);
+
+    // Pass the mouse world-position so the player can face the cursor
+    void setAimTarget(sf::Vector2f worldMousePos);
+
+    // Load walk frames from a folder
+    void loadAnimations(const std::string& walkFramesDir);
 
     void update(float dt) override;
     void render(sf::RenderTarget& target) override;
     sf::FloatRect getBounds() const override;
 
-    // Stat accessors needed by other systems
-    int   getMoney()   const { return money; }
-    int   getScore()   const { return score; }
-    float getMoveSpeed() const { return moveSpeed; }
+    // Accessors
+    int          getMoney()     const { return money; }
+    int          getScore()     const { return score; }
+    float        getMoveSpeed() const { return moveSpeed; }
+    sf::Vector2f getAimDir()    const { return aimDir; }   // unit vec toward cursor (for shooting)
+    bool         isMoving()     const { return moving; }
+    bool         isFacingLeft() const { return facingLeft; }
 
-    // Called by pickup system
-    void addMoney(int amount)  { money  += amount; }
-    void addScore(int amount)  { score  += amount; }
+    void addMoney(int amount)    { money += amount; }
+    void addScore(int amount)    { score += amount; }
     void addHealth(float amount);
 
-    // Weapon slot count (for HUD)
-    static constexpr int WEAPON_SLOTS = 4;
+    static constexpr int   WEAPON_SLOTS = 4;
+    static constexpr float RADIUS       = 12.f;
 
 private:
-    float moveSpeed = 200.f;
-    int   money     = 0;
-    int   score     = 0;
+    // Walk animation
+    std::vector<sf::Texture>  walkFrames;
+    std::optional<sf::Sprite> sprite;
+    int   currentFrame = 0;
+    float animTimer    = 0.f;
+    float animSpeed    = 0.10f; // seconds per frame
+
+    // State
+    float        moveSpeed  = 160.f;
+    sf::Vector2f aimDir     = {1.f, 0.f};  // toward mouse cursor (used for shooting)
+    bool         moving     = false;
+    bool         facingLeft = false;       // set by A/D keys
+
+    // Stats
+    int money = 0;
+    int score = 0;
+
+    void renderPlaceholder(sf::RenderTarget& target);
 };
-=======
->>>>>>> bea2a1f88c2f1dfa6438e88ebd05269171c73a78

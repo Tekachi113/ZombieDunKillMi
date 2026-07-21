@@ -1,4 +1,5 @@
 #include "MenuState.h"
+#include "PlayState.h"
 #include "core/Game.h"
 #include <iostream>
 #include <cmath>
@@ -96,7 +97,9 @@ void MenuState::handleEvent(const sf::Event& event) {
             case sf::Keyboard::Key::Space:
                 if (selectedButton == 0) {
                     std::cout << "[MenuState] Start game!" << std::endl;
-                    // TODO: Change to PlayState when it's ready
+                    game.getStateManager().changeState(
+                        std::make_unique<PlayState>(game));
+                    return;
                 } else if (selectedButton == 1) {
                     game.getWindow().close();
                 }
