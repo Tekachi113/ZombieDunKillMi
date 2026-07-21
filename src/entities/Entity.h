@@ -1,4 +1,5 @@
 #pragma once
+<<<<<<< HEAD
 
 #include <SFML/Graphics.hpp>
 
@@ -43,3 +44,5 @@ protected:
     float maxHealth = 100.f;
     bool  alive     = true;
 };
+=======
+>>>>>>> bea2a1f88c2f1dfa6438e88ebd05269171c73a78

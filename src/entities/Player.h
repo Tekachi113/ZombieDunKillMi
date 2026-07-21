@@ -1,4 +1,5 @@
 #pragma once
+<<<<<<< HEAD
 
 #include "Entity.h"
 #include <SFML/Graphics.hpp>
@@ -35,3 +36,5 @@ private:
     int   money     = 0;
     int   score     = 0;
 };
+=======
+>>>>>>> bea2a1f88c2f1dfa6438e88ebd05269171c73a78

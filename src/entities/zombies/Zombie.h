@@ -1,4 +1,5 @@
 #pragma once
+<<<<<<< HEAD
 
 #include "../Entity.h"
 #include <SFML/Graphics.hpp>
@@ -58,3 +59,5 @@ protected:
     float spitCooldown   = 2.5f;
     float preferredRange = 250.f;
 };
+=======
+>>>>>>> bea2a1f88c2f1dfa6438e88ebd05269171c73a78
