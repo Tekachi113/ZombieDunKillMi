@@ -54,6 +54,7 @@ private:
     float        moveSpeed  = 160.f;
     sf::Vector2f aimDir     = {1.f, 0.f};  // toward mouse cursor (used for shooting)
     bool         moving     = false;
+    bool         movingHorizontal = false;
     bool         facingLeft = false;       // set by A/D keys
 
     // Stats

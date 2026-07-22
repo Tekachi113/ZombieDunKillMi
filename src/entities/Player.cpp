@@ -75,31 +75,22 @@ void Player::handleInput(const InputManager& input, float dt) {
     if (pressingLeft)  dir.x -= 1.f;
     if (pressingRight) dir.x += 1.f;
 
-    // Update horizontal facing based on keys pressed —
-    // A/D set it directly; W/S alone keep the last direction
+    // Update horizontal facing: A/D set it directly; W/S alone keep last
     if (pressingLeft && !pressingRight)
         facingLeft = true;
     else if (pressingRight && !pressingLeft)
         facingLeft = false;
-    // (if both or neither horizontal key, keep previous facingLeft)
 
     // Normalise diagonal
     float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
     if (len > 0.f) dir /= len;
 
-    moving   = (len > 0.f);
-    velocity = dir * moveSpeed;
-    position += velocity * dt;
-
-    // DEBUG — remove once animation is confirmed working
-    static bool lastMoving = false;
-    if (moving != lastMoving) {
-        std::cout << "[Player] moving=" << moving
-                  << " len=" << len
-                  << " W=" << pressingUp << " S=" << pressingDown
-                  << " A=" << pressingLeft << " D=" << pressingRight << "\n";
-        lastMoving = moving;
-    }
+    // Only animate when actually pressing a horizontal key (A or D).
+    // Pressing only W or S shows idle pose so sideways sprite doesn't moonwalk.
+    movingHorizontal = (pressingLeft || pressingRight);
+    moving           = (len > 0.f);
+    velocity         = dir * moveSpeed;
+    position        += velocity * dt;
 }
 
 // =========================================================
@@ -108,23 +99,23 @@ void Player::handleInput(const InputManager& input, float dt) {
 void Player::update(float dt) {
     if (!walkFrames.empty() && sprite) {
         // --- Walk animation ---
-        if (moving) {
+        // Only cycle frames when pressing A or D.
+        // Pressing W/S alone keeps frame 0 so the sideways sprite doesn't moonwalk.
+        if (movingHorizontal) {
             animTimer += dt;
             if (animTimer >= animSpeed) {
-                animTimer = 0.f;
+                animTimer    = 0.f;
                 currentFrame = (currentFrame + 1) % static_cast<int>(walkFrames.size());
                 sprite->setTexture(walkFrames[currentFrame]);
             }
         } else {
-            // Idle — snap to frame 0
-            if (currentFrame != 0) {
-                currentFrame = 0;
-                animTimer    = 0.f;
-                sprite->setTexture(walkFrames[0]);
-            }
+            // Idle — reset to frame 0 and clear timer
+            currentFrame = 0;
+            animTimer    = 0.f;
+            sprite->setTexture(walkFrames[0]);
         }
 
-        // --- Flip sprite based on last horizontal key direction ---
+        // --- Flip sprite based on last A/D key pressed ---
         float scaleX = facingLeft ? -3.f : 3.f;
         sprite->setScale({scaleX, 3.f});
         sprite->setPosition(position);
