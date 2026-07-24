@@ -2,9 +2,7 @@ cmake_minimum_required(VERSION 3.30)
 
 # The toolchain file setup should ideally be in a CMakePresets.json file,
 # but we'll keep it here for simplicity
-set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-    CACHE STRING "Vcpkg toolchain file")
-
+set(CMAKE_TOOLCHAIN_FILE "C:/vcpkg/scripts/buildsystems/vcpkg.cmake") 
 project(ZombieDontKillMe VERSION 1.0)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -29,7 +27,7 @@ file(GLOB_RECURSE ZombieDontKillMe_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.inl"
 )
 
-target_sources(ZombieDontKillMe PRIVATE ${ZombieDontKillMe_SOURCES})
+target_sources(ZombieDontKillMe PRIVATE ${ZombieDontKillMe_SOURCES} "src/states/PauseState.h" "src/states/PauseState.cpp")
 
 # Game include dirs
 target_include_directories(ZombieDontKillMe PRIVATE

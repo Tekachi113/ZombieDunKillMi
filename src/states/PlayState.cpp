@@ -1,3 +1,4 @@
+#include "PauseState.h"
 #include "PlayState.h"
 #include "core/Game.h"
 #include <iostream>
@@ -182,15 +183,17 @@ void PlayState::buildVertices() {
 // =========================================================
 //  handleEvent
 // =========================================================
-void PlayState::handleEvent(const sf::Event& event) {
-    if (const auto* key = event.getIf<sf::Event::KeyPressed>()) {
-        if (key->code == sf::Keyboard::Key::Escape) {
-            // TODO: push PauseState
-            std::cout << "[PlayState] ESC — pause (not yet implemented)\n";
+void PlayState::handleEvent(const sf::Event& event)
+{
+    if (const auto* key = event.getIf<sf::Event::KeyPressed>())
+    {
+        if (key->code == sf::Keyboard::Key::Escape)
+        {
+            game.getStateManager().pushState(
+                std::make_unique<PauseState>(game));
         }
     }
 }
-
 // =========================================================
 //  update
 // =========================================================
