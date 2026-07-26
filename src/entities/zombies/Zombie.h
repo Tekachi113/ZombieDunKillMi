@@ -3,6 +3,7 @@
 #include "../Entity.h"
 #include <SFML/Graphics.hpp>
 
+class EntityManager;
 // =========================================================
 //  Zombie — base class for all zombie types
 // =========================================================
@@ -21,6 +22,10 @@ public:
     int getXpReward()    const { return xpReward; }
     int getMoneyReward() const { return moneyReward; }
 
+    static void setTarget(Entity* t) { target = t; }
+    static void setEntityManager(EntityManager* em) { entityManagerRef = em; }
+    static Entity* getTarget() { return target; }
+
 protected:
     float moveSpeed;
     float damage;
@@ -28,6 +33,11 @@ protected:
     int   moneyReward = 2;
     float attackTimer = 0.f;
     float attackRate  = 1.f;
+
+    float meleeRange = RADIUS + 20.f; // how close the target must be to get attacked
+
+    static Entity* target;
+    static EntityManager* entityManagerRef;
 
     static constexpr float RADIUS = 14.f;
 };
@@ -54,7 +64,11 @@ public:
     explicit TurretZombie(sf::Vector2f pos);
     void update(float dt) override;
 protected:
+    void spit(sf::Vector2f targetPos);
+
     float spitTimer      = 0.f;
     float spitCooldown   = 2.5f;
     float preferredRange = 250.f;
+    float spitDamage;
+    float spitSpeed = 260.f;
 };
