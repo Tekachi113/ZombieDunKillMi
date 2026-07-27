@@ -1,11 +1,11 @@
 #include "InputManager.h"
 
 void InputManager::update() {
-    // Store previous frame state
+    
     previousKeys = currentKeys;
     previousMouseButtons = currentMouseButtons;
 
-    // Poll current keyboard state for commonly used keys
+    
     static const sf::Keyboard::Key trackedKeys[] = {
         sf::Keyboard::Key::W, sf::Keyboard::Key::A, sf::Keyboard::Key::S, sf::Keyboard::Key::D,
         sf::Keyboard::Key::R, sf::Keyboard::Key::E, sf::Keyboard::Key::F, sf::Keyboard::Key::Q,

@@ -6,7 +6,6 @@
 #include <filesystem>
 #include <algorithm>
 
-// ---- Tileset paths relative to the executable (assets/ is copied next to it) ----
 static const std::string TERRAIN_DIR =
     "assets/textures/terrain/variations/";
 static const std::string WALL_PATH   =
@@ -14,9 +13,7 @@ static const std::string WALL_PATH   =
 static const std::string PLAYER_WALK_DIR =
     "assets/textures/player/walk/";
 
-// =========================================================
-//  Constructor
-// =========================================================
+
 PlayState::PlayState(Game& game)
     : GameState(game)
     , player({mapPixelW() * 0.5f, mapPixelH() * 0.5f})   // spawn at map centre
@@ -26,15 +23,12 @@ PlayState::PlayState(Game& game)
 {
 }
 
-// =========================================================
-//  onEnter
-// =========================================================
+
 void PlayState::onEnter() {
     std::cout << "[PlayState] Entering play state\n";
 
-    // --- Load terrain textures ---
     terrainTiles.clear();
-    // Load up to 4 terrain variation PNGs from the asset folder
+ 
     std::vector<std::string> terrainPaths;
     try {
         for (auto& e : std::filesystem::directory_iterator(TERRAIN_DIR)) {
@@ -54,23 +48,21 @@ void PlayState::onEnter() {
         terrainTiles.push_back(std::move(tv));
     }
 
-    // Fallback: solid colour tiles when no PNGs exist
+    
     if (terrainTiles.empty()) {
         std::cout << "[PlayState] No terrain PNGs found — using colour tiles\n";
     }
 
-    // --- Load wall tile ---
     wallTile.loaded = wallTile.texture.loadFromFile(WALL_PATH);
     wallTile.texture.setSmooth(false);
 
-    // --- Load player walk animation ---
+    
     player.loadAnimations(PLAYER_WALK_DIR);
 
-    // --- Build the tile grid + vertex arrays ---
     buildMap();
     buildVertices();
 
-    // --- HUD font ---
+    
     if (hudFont.openFromFile("assets/fonts/default.ttf")) {
         pauseHint.emplace(hudFont);
         pauseHint->setString("WASD to move   ESC to pause");
@@ -84,9 +76,7 @@ void PlayState::onExit() {
     std::cout << "[PlayState] Exiting play state\n";
 }
 
-// =========================================================
-//  buildMap — fill tileGrid with a simple layout
-// =========================================================
+
 void PlayState::buildMap() {
     std::srand(42); // fixed seed for reproducible map
 
@@ -94,14 +84,14 @@ void PlayState::buildMap() {
 
     for (int r = 0; r < MAP_ROWS; ++r) {
         for (int c = 0; c < MAP_COLS; ++c) {
-            // Border = wall (tile index -1)
+          
             if (r == 0 || r == MAP_ROWS - 1 || c == 0 || c == MAP_COLS - 1) {
                 tileGrid[r][c] = -1; // wall
             } else {
-                // Random ground variation (0..N-1)
+               
                 int variants = terrainTiles.empty() ? 1
                              : static_cast<int>(terrainTiles.size());
-                // Weighted: 70% tile 0, rest random
+               
                 tileGrid[r][c] = (std::rand() % 10 < 7) ? 0
                                 : (std::rand() % variants);
             }

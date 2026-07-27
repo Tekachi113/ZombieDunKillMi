@@ -8,10 +8,10 @@
 #include "../entities/world_objects/WorldObjects.h"
 #include <cmath>
 
-// ---- Public entry point --------------------------------
+
 
 void CollisionSystem::resolve(EntityManager& entities, const TileMap& map) {
-    // 1. Push all entities out of solid tiles
+    
     for (Entity* e : entities.getAll()) {
         if (e->isAlive()) resolveTileCollisions(*e, map);
     }
@@ -23,11 +23,11 @@ void CollisionSystem::resolve(EntityManager& entities, const TileMap& map) {
 // ---- Tile Collision ------------------------------------
 
 void CollisionSystem::resolveTileCollisions(Entity& entity, const TileMap& map) const {
-    // Sample the four corners of the entity's bounding box
+   
     sf::FloatRect bounds = entity.getBounds();
     const int tileSize = map.getTileSize();
 
-    // Expand check range by one tile
+    
     int colMin = static_cast<int>(bounds.position.x) / tileSize - 1;
     int colMax = static_cast<int>(bounds.position.x + bounds.size.x) / tileSize + 1;
     int rowMin = static_cast<int>(bounds.position.y) / tileSize - 1;
@@ -50,13 +50,13 @@ void CollisionSystem::resolveTileCollisions(Entity& entity, const TileMap& map) 
                 sf::Vector2f push = calcPushVector(bounds, tileBounds);
                 sf::Vector2f pos  = entity.getPosition();
                 entity.setPosition(pos + push);
-                bounds = entity.getBounds(); // recalculate after push
+                bounds = entity.getBounds(); 
             }
         }
     }
 }
 
-// ---- Entity vs Entity ----------------------------------
+
 
 void CollisionSystem::resolveEntityCollisions(EntityManager& entities) {
     auto all = entities.getAll();
@@ -84,8 +84,7 @@ void CollisionSystem::resolveEntityCollisions(EntityManager& entities) {
                 }
             }
 
-            // Zombie vs breakable box — zombies don't interact with boxes
-            // Player collision is handled in PlayState (Player is not in EntityManager)
+  
         }
     }
 }

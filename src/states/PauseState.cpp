@@ -61,18 +61,18 @@ void PauseState::handleEvent(const sf::Event& event)
 
             if (selectedButton == 0)
             {
-                // Resume
+                
                 game.getStateManager().popState();
             }
             else if (selectedButton == 1)
             {
-                // Main Menu
+                
                 game.getStateManager().changeState(
                     std::make_unique<MenuState>(game));
             }
             else if (selectedButton == 2)
             {
-                // Quit
+                
                 game.getWindow().close();
             }
             break;
