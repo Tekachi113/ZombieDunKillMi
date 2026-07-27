@@ -1,10 +1,12 @@
 #include "PauseState.h"
 #include "PlayState.h"
 #include "core/Game.h"
+#include "entities/world_objects/WorldObjects.h"
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
 #include <algorithm>
+#include <random>
 
 static const std::string TERRAIN_DIR =
     "assets/textures/terrain/variations/";
@@ -48,7 +50,6 @@ void PlayState::onEnter() {
         terrainTiles.push_back(std::move(tv));
     }
 
-    
     if (terrainTiles.empty()) {
         std::cout << "[PlayState] No terrain PNGs found — using colour tiles\n";
     }
@@ -56,13 +57,70 @@ void PlayState::onEnter() {
     wallTile.loaded = wallTile.texture.loadFromFile(WALL_PATH);
     wallTile.texture.setSmooth(false);
 
-    
+    // Preload textures for breakable/graphic scenery entities
+    game.getResources().loadTexture("crate", "assets/textures/objects/crate.png");
+    game.getResources().loadTexture("barrel", "assets/textures/objects/barrel.png");
+    game.getResources().loadTexture("tree", "assets/textures/objects/tree.png");
+    game.getResources().loadTexture("bush", "assets/textures/objects/bush.png");
+
     player.loadAnimations(PLAYER_WALK_DIR);
 
     buildMap();
     buildVertices();
 
+    // Initialize the TileMap backing map with the procedural grid for collision resolution
+    tileMap.initialize(MAP_COLS, MAP_ROWS, TILE_PX);
+    for (int r = 0; r < MAP_ROWS; ++r) {
+        for (int c = 0; c < MAP_COLS; ++c) {
+            bool isWalk = (tileGrid[r][c] != -1);
+            tileMap.setTile(c, r, tileGrid[r][c], isWalk);
+        }
+    }
+
+    // Spawn crates, barrels, trees, and bushes randomly
+    std::vector<sf::Vector2f> spawnPoints;
+    for (int r = 2; r < MAP_ROWS - 2; ++r) {
+        for (int c = 2; c < MAP_COLS - 2; ++c) {
+            // Check if floor tile
+            if (tileGrid[r][c] != -1) {
+                float px = (c + 0.5f) * TILE_PX;
+                float py = (r + 0.5f) * TILE_PX;
+                sf::Vector2f playerPos = player.getPosition();
+                // Skip spawning too close to the player's spawn position (the center)
+                float distSq = (px - playerPos.x) * (px - playerPos.x) + (py - playerPos.y) * (py - playerPos.y);
+                if (distSq > (TILE_PX * 3.f) * (TILE_PX * 3.f)) {
+                    spawnPoints.push_back({px, py});
+                }
+            }
+        }
+    }
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(spawnPoints.begin(), spawnPoints.end(), g);
+
+    std::size_t idx = 0;
     
+    // Spawn 15 breakable boxes (crates)
+    for (int i = 0; i < 15 && idx < spawnPoints.size(); ++i) {
+        entityManager.add(std::make_unique<BreakableBox>(spawnPoints[idx++], game.getResources().getTexture("crate")));
+    }
+
+    // Spawn 8 exploding barrels
+    for (int i = 0; i < 8 && idx < spawnPoints.size(); ++i) {
+        entityManager.add(std::make_unique<ExplodingBarrel>(spawnPoints[idx++], game.getResources().getTexture("barrel")));
+    }
+
+    // Spawn 10 collidable trees
+    for (int i = 0; i < 10 && idx < spawnPoints.size(); ++i) {
+        entityManager.add(std::make_unique<SceneryObject>(spawnPoints[idx++], game.getResources().getTexture("tree"), true));
+    }
+
+    // Spawn 10 non-collidable decorative bushes
+    for (int i = 0; i < 10 && idx < spawnPoints.size(); ++i) {
+        entityManager.add(std::make_unique<SceneryObject>(spawnPoints[idx++], game.getResources().getTexture("bush"), false));
+    }
+
     if (hudFont.openFromFile("assets/fonts/default.ttf")) {
         pauseHint.emplace(hudFont);
         pauseHint->setString("WASD to move   ESC to pause");
@@ -74,6 +132,7 @@ void PlayState::onEnter() {
 
 void PlayState::onExit() {
     std::cout << "[PlayState] Exiting play state\n";
+    entityManager.clear();
 }
 
 
@@ -199,9 +258,16 @@ void PlayState::update(float dt) {
     player.setPosition(pos);
 
     player.update(dt);
+    entityManager.update(dt);
+
+    // Resolve all collisions (Player & other entities vs tiles, obstacles, etc.)
+    collisionSystem.resolve(entityManager, tileMap, player);
+
+    // Remove dead entities (e.g. broken crates, exploded barrels)
+    entityManager.removeDead();
 
     // Follow camera
-    camera.setCenter(pos);
+    camera.setCenter(player.getPosition());
     clampCamera();
 }
 
@@ -285,7 +351,10 @@ void PlayState::render(sf::RenderTarget& target) {
         target.draw(va, rs);
     }
 
-    
+    // Draw world entities (crates, barrels, trees, bushes)
+    entityManager.render(target);
+
+    // Draw player
     player.render(target);
 
     

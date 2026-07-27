@@ -8,13 +8,15 @@ class Entity;
 class EntityManager;
 class TileMap;
 
+class Player;
+
 // =========================================================
 //  CollisionSystem — resolves collisions each frame
 // =========================================================
 class CollisionSystem {
 public:
     // Main entry point — call once per frame after entity updates
-    void resolve(EntityManager& entities, const TileMap& map);
+    void resolve(EntityManager& entities, const TileMap& map, Player& player);
 
 private:
     // --- Tile collision ---
@@ -23,7 +25,7 @@ private:
 
     // --- Entity vs Entity ---
     // Damage/response logic for specific entity type pairs
-    void resolveEntityCollisions(EntityManager& entities);
+    void resolveEntityCollisions(EntityManager& entities, Player& player);
 
     // --- Primitive helpers ---
     // Circle vs AABB (tile) overlap test

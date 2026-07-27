@@ -2,6 +2,9 @@
 
 #include "core/StateManager.h"
 #include "entities/Player.h"
+#include "world/EntityManager.h"
+#include "world/CollisionSystem.h"
+#include "world/TileMap.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 
@@ -16,13 +19,19 @@ public:
     void onExit()                           override;
 
 private:
-    
+    // ---- Player ----
     Player player;
 
-    
+    // ---- Entities ----
+    EntityManager   entityManager;
+    CollisionSystem collisionSystem;
+
+    // ---- Camera ----
     sf::View camera;
 
-
+    // ---- Procedural tile map ----
+    TileMap                  tileMap; // backing map for collision queries
+    // We render a simple tiled ground using the terrain sprites.
     struct TileVariant {
         sf::Texture texture;
         bool loaded = false;

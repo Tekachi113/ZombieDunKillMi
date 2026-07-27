@@ -4,11 +4,11 @@
 #include <SFML/Graphics.hpp>
 
 // =========================================================
-//  BreakableBox — stub (full implementation: Person B)
+//  BreakableBox — destructible obstacle
 // =========================================================
 class BreakableBox : public Entity {
 public:
-    explicit BreakableBox(sf::Vector2f pos);
+    BreakableBox(sf::Vector2f pos, const sf::Texture& tex);
 
     void update(float dt) override;
     void render(sf::RenderTarget& target) override;
@@ -17,15 +17,15 @@ public:
     void onDeath() override;
 
 private:
-    static constexpr float SIZE = 24.f;
+    sf::Sprite sprite;
 };
 
 // =========================================================
-//  ExplodingBarrel — stub (full implementation: Person B)
+//  ExplodingBarrel — explodes when shot
 // =========================================================
 class ExplodingBarrel : public Entity {
 public:
-    explicit ExplodingBarrel(sf::Vector2f pos);
+    ExplodingBarrel(sf::Vector2f pos, const sf::Texture& tex);
 
     void update(float dt) override;
     void render(sf::RenderTarget& target) override;
@@ -37,5 +37,22 @@ public:
     static constexpr float BLAST_DAMAGE  = 120.f;
 
 private:
-    static constexpr float SIZE = 24.f;
+    sf::Sprite sprite;
 };
+
+// =========================================================
+//  SceneryObject — non-destructible obstacle/graphic (tree, bush, etc)
+// =========================================================
+class SceneryObject : public Entity {
+public:
+    SceneryObject(sf::Vector2f pos, const sf::Texture& tex, bool collidable = true);
+
+    void update(float dt) override;
+    void render(sf::RenderTarget& target) override;
+    sf::FloatRect getBounds() const override;
+
+private:
+    sf::Sprite sprite;
+    bool collidable;
+};
+

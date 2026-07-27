@@ -10,14 +10,15 @@
 
 
 
-void CollisionSystem::resolve(EntityManager& entities, const TileMap& map) {
-    
+void CollisionSystem::resolve(EntityManager& entities, const TileMap& map, Player& player) {
+    // 1. Tile collisions
+    resolveTileCollisions(player, map);
     for (Entity* e : entities.getAll()) {
         if (e->isAlive()) resolveTileCollisions(*e, map);
     }
 
-    // 2. Entity vs Entity interactions
-    resolveEntityCollisions(entities);
+    // 2. Entity vs Entity / Player collisions
+    resolveEntityCollisions(entities, player);
 }
 
 // ---- Tile Collision ------------------------------------
@@ -58,9 +59,22 @@ void CollisionSystem::resolveTileCollisions(Entity& entity, const TileMap& map) 
 
 
 
-void CollisionSystem::resolveEntityCollisions(EntityManager& entities) {
+void CollisionSystem::resolveEntityCollisions(EntityManager& entities, Player& player) {
     auto all = entities.getAll();
 
+    // Helper to identify solid world obstacles (crates, barrels, solid scenery)
+    auto isSolidObstacle = [](Entity* e) {
+        if (dynamic_cast<BreakableBox*>(e) || dynamic_cast<ExplodingBarrel*>(e)) {
+            return true;
+        }
+        if (auto* scen = dynamic_cast<SceneryObject*>(e)) {
+            // Check if bounds width is non-zero (collidable)
+            return scen->getBounds().size.x > 0.f;
+        }
+        return false;
+    };
+
+    // 1. Entity vs Entity interactions
     for (std::size_t i = 0; i < all.size(); ++i) {
         for (std::size_t j = i + 1; j < all.size(); ++j) {
             Entity* a = all[i];
@@ -84,7 +98,51 @@ void CollisionSystem::resolveEntityCollisions(EntityManager& entities) {
                 }
             }
 
-  
+            // Projectile hits Solid Obstacle (box, barrel, solid scenery like tree)
+            if (auto* proj = dynamic_cast<Projectile*>(a)) {
+                if (isSolidObstacle(b)) {
+                    b->takeDamage(proj->getDamage());
+                    proj->onHit();
+                    continue;
+                }
+            }
+            if (auto* proj = dynamic_cast<Projectile*>(b)) {
+                if (isSolidObstacle(a)) {
+                    a->takeDamage(proj->getDamage());
+                    proj->onHit();
+                    continue;
+                }
+            }
+
+            // Zombie vs Solid Obstacle
+            if (auto* zombie = dynamic_cast<Zombie*>(a)) {
+                if (isSolidObstacle(b)) {
+                    sf::Vector2f push = calcPushVector(zombie->getBounds(), b->getBounds());
+                    zombie->setPosition(zombie->getPosition() + push);
+                    continue;
+                }
+            }
+            if (auto* zombie = dynamic_cast<Zombie*>(b)) {
+                if (isSolidObstacle(a)) {
+                    sf::Vector2f push = calcPushVector(zombie->getBounds(), a->getBounds());
+                    zombie->setPosition(zombie->getPosition() + push);
+                    continue;
+                }
+            }
+        }
+    }
+
+    // 2. Player vs all other entities
+    if (player.isAlive()) {
+        for (Entity* e : all) {
+            if (!e->isAlive()) continue;
+            if (!aabbOverlap(player.getBounds(), e->getBounds())) continue;
+
+            // Player vs Solid Obstacle (crates, barrels, trees)
+            if (isSolidObstacle(e)) {
+                sf::Vector2f push = calcPushVector(player.getBounds(), e->getBounds());
+                player.setPosition(player.getPosition() + push);
+            }
         }
     }
 }
