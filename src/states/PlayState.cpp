@@ -78,7 +78,7 @@ void PlayState::onExit() {
 
 
 void PlayState::buildMap() {
-    std::srand(42); // fixed seed for reproducible map
+    std::srand(42); 
 
     tileGrid.assign(MAP_ROWS, std::vector<int>(MAP_COLS, 0));
 
@@ -86,7 +86,7 @@ void PlayState::buildMap() {
         for (int c = 0; c < MAP_COLS; ++c) {
           
             if (r == 0 || r == MAP_ROWS - 1 || c == 0 || c == MAP_COLS - 1) {
-                tileGrid[r][c] = -1; // wall
+                tileGrid[r][c] = -1; 
             } else {
                
                 int variants = terrainTiles.empty() ? 1
@@ -99,9 +99,7 @@ void PlayState::buildMap() {
     }
 }
 
-// =========================================================
-//  buildVertices — pre-build sf::VertexArray for fast render
-// =========================================================
+
 void PlayState::buildVertices() {
     // Count ground and wall quads separately
     int groundCount = 0, wallCount = 0;
@@ -115,7 +113,6 @@ void PlayState::buildVertices() {
     wallVerts.setPrimitiveType(sf::PrimitiveType::Triangles);
     wallVerts.resize(static_cast<std::size_t>(wallCount * 6));
 
-    // Helper: fill 2 triangles at base index
     auto fillQuad = [&](sf::VertexArray& va, std::size_t base,
                         float x, float y, float s,
                         float tx, float ty, float ts,
@@ -170,9 +167,6 @@ void PlayState::buildVertices() {
     }
 }
 
-// =========================================================
-//  handleEvent
-// =========================================================
 void PlayState::handleEvent(const sf::Event& event)
 {
     if (const auto* key = event.getIf<sf::Event::KeyPressed>())
@@ -184,9 +178,7 @@ void PlayState::handleEvent(const sf::Event& event)
         }
     }
 }
-// =========================================================
-//  update
-// =========================================================
+
 void PlayState::update(float dt) {
     // Mouse world position (convert screen coords through the camera view)
     game.getWindow().setView(camera);
@@ -194,13 +186,12 @@ void PlayState::update(float dt) {
         sf::Mouse::getPosition(game.getWindow()));
     game.getWindow().setView(game.getWindow().getDefaultView());
 
-    // Let the player face the cursor
+    
     player.setAimTarget(mouseWorld);
 
-    // Input-driven movement
+    
     player.handleInput(game.getInput(), dt);
 
-    // Clamp player inside the walkable area (1 tile border = wall)
     const float margin = static_cast<float>(TILE_PX) + Player::RADIUS;
     sf::Vector2f pos = player.getPosition();
     pos.x = std::max(margin, std::min(pos.x, mapPixelW() - margin));
@@ -230,15 +221,13 @@ void PlayState::clampCamera() {
 void PlayState::render(sf::RenderTarget& target) {
     target.setView(camera);
 
-    // Draw ground
+    
     if (!terrainTiles.empty()) {
-        // Group tiles by texture and draw in batches
-        // Simple approach: draw each tile type separately
+
         for (std::size_t ti = 0; ti < terrainTiles.size(); ++ti) {
             sf::RenderStates rs;
             rs.texture = terrainTiles[ti].loaded ? &terrainTiles[ti].texture : nullptr;
-            // Build a per-variant vertex array on the fly (small map, OK for now)
-            // For a full game this would be pre-built per variant
+    
             sf::VertexArray va(sf::PrimitiveType::Triangles);
             for (int r = 0; r < MAP_ROWS; ++r) {
                 for (int c = 0; c < MAP_COLS; ++c) {
@@ -269,7 +258,7 @@ void PlayState::render(sf::RenderTarget& target) {
         target.draw(ground);
     }
 
-    // Draw walls
+    
     {
         sf::RenderStates rs;
         rs.texture = wallTile.loaded ? &wallTile.texture : nullptr;
@@ -296,14 +285,14 @@ void PlayState::render(sf::RenderTarget& target) {
         target.draw(va, rs);
     }
 
-    // Draw player
+    
     player.render(target);
 
-    // HUD — switch to default view so it's screen-space
+    
     target.setView(target.getDefaultView());
     if (pauseHint) target.draw(*pauseHint);
 
-    // Health bar
+    
     {
         float barW  = 200.f, barH = 16.f, barX = 10.f, barY = 34.f;
         sf::RectangleShape bgBar({barW, barH});
