@@ -27,7 +27,7 @@ file(GLOB_RECURSE ZombieDontKillMe_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/src/*.inl"
 )
 
-target_sources(ZombieDontKillMe PRIVATE ${ZombieDontKillMe_SOURCES} "src/states/PauseState.h" "src/states/PauseState.cpp")
+target_sources(ZombieDontKillMe PRIVATE ${ZombieDontKillMe_SOURCES} "src/states/PauseState.h" "src/states/PauseState.cpp"  "src/states/GameOverState.cpp" "src/states/GameOverState.h")
 
 # Game include dirs
 target_include_directories(ZombieDontKillMe PRIVATE

@@ -1,3 +1,4 @@
+#include "GameOverState.h"
 #include "PauseState.h"
 #include "PlayState.h"
 #include "core/Game.h"
