@@ -52,7 +52,7 @@ void SpawnManager::startWave(int waveIndex, const sf::FloatRect& mapBounds) {
     spawnTimer         = 0.f;
     zombieSpawnCursor  = 0;
 
-    // Count total zombies this wave
+
     zombiesLeftToSpawn = 0;
     for (auto& e : waveDefs[waveIndex].zombies)
         zombiesLeftToSpawn += e.count;
@@ -74,15 +74,14 @@ void SpawnManager::update(float dt, EntityManager& entities, const Player& playe
 }
 
 bool SpawnManager::isWaveComplete() const {
-    // Wave is complete when all zombies have been spawned AND none are alive
-    // (EntityManager tracking is the responsibility of PlayState)
+  
     return waveActive && zombiesLeftToSpawn <= 0;
 }
 
 void SpawnManager::spawnNext(EntityManager& entities, const Player& player) {
     if (zombiesLeftToSpawn <= 0) return;
 
-    // Find which zombie type to spawn next using the cursor
+    
     auto& zombieList = waveDefs[currentWaveIndex].zombies;
     int cursor = 0;
     std::string type = zombieList.empty() ? "small" : zombieList.back().type;
@@ -110,7 +109,7 @@ void SpawnManager::spawnNext(EntityManager& entities, const Player& player) {
 }
 
 sf::Vector2f SpawnManager::randomSpawnPos(const Player& /*player*/) const {
-    // Spawn off-screen on a random edge
+
     const float margin = 80.f;
 
     sf::Vector2f pos;

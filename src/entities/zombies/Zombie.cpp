@@ -1,6 +1,14 @@
 #include "Zombie.h"
+#include "../../world/EntityManager.h"
+#include "../Projectile.h"
 #include <iostream>
 #include <cmath>
+#include <memory>
+
+// ---- Static shared state (single-player game) ------------
+Entity* Zombie::target = nullptr;
+EntityManager* Zombie::entityManagerRef = nullptr;
+
 
 // ---- Zombie base ----------------------------------------
 
@@ -14,8 +22,19 @@ Zombie::Zombie(sf::Vector2f pos, float hp, float spd, float dmg)
 }
 
 void Zombie::update(float dt) {
-    // TODO: Person B — AI chase & attack
     attackTimer += dt;
+
+    if (!target || !target->isAlive()) return;
+
+    sf::Vector2f diff = target->getPosition() - position;
+    float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+    if (dist <= meleeRange) {
+        attack(*target);
+    }
+    else {
+        chase(target->getPosition(), dt);
+    }
 }
 
 void Zombie::render(sf::RenderTarget& target) {
@@ -83,13 +102,45 @@ BigZombie::BigZombie(sf::Vector2f pos)
 TurretZombie::TurretZombie(sf::Vector2f pos)
     : Zombie(pos, 150.f, 10.f, 12.f)
 {
-    xpReward    = 35;
+    xpReward = 35;
     moneyReward = 5;
-    attackRate  = 0.4f;
+    attackRate = 0.4f;
+    spitDamage = damage; // reuse the base "damage" stat for the projectile
+    meleeRange = 0.f;    // turret never melees — it only ever spits
 }
 
 void TurretZombie::update(float dt) {
-    Zombie::update(dt);
+    attackTimer += dt;
     spitTimer += dt;
-    // TODO: Person B — ranged spit projectile logic
+
+    if (!target || !target->isAlive()) return;
+
+    sf::Vector2f diff = target->getPosition() - position;
+    float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+    // Keep roughly `preferredRange` away: close in if too far, back off if too close.
+    if (dist > preferredRange) {
+        chase(target->getPosition(), dt);
+    }
+    else if (dist < preferredRange * 0.7f && dist > 0.001f) {
+        sf::Vector2f awayDir = -diff / dist;
+        position += awayDir * moveSpeed * dt;
+    }
+
+    // Spit whenever the target is roughly in range, on its own cooldown
+    if (dist <= preferredRange * 1.3f && spitTimer >= spitCooldown) {
+        spitTimer = 0.f;
+        spit(target->getPosition());
+    }
+}
+
+void TurretZombie::spit(sf::Vector2f targetPos) {
+    if (!entityManagerRef) return; // EntityManager not wired up yet — nothing to spawn into
+
+    sf::Vector2f dir = targetPos - position;
+    float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
+    if (len < 0.001f) return;
+    dir /= len;
+
+    entityManagerRef->add(std::make_unique<Projectile>(position, dir, spitSpeed, spitDamage, this));
 }

@@ -3,7 +3,11 @@
 // ---------------- Animation ----------------
 
 void Animation::update(float dt) {
-    if (frames.size() <= 1 || finished) return;
+    if (frames.size() <= 1 || finished || frameDuration <= 0.f || dt <= 0.f) return;
+
+    if (currentFrame >= frames.size()) {
+        currentFrame = 0;
+    }
 
     timer += dt;
     while (timer >= frameDuration) {
@@ -30,7 +34,7 @@ void Animation::reset() {
 }
 
 const sf::Texture* Animation::getCurrentTexture() const {
-    if (frames.empty()) return nullptr;
+    if (frames.empty() || currentFrame >= frames.size()) return nullptr;
     return frames[currentFrame];
 }
 

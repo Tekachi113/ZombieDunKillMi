@@ -123,3 +123,19 @@ bool TileMap::isWalkable(sf::Vector2f worldPos) const {
         return false;
     return walkable[static_cast<std::size_t>(row)][static_cast<std::size_t>(col)];
 }
+
+void TileMap::initialize(int width, int height, int tileSizePx) {
+    widthTiles = width;
+    heightTiles = height;
+    tileSize = tileSizePx;
+    tileGrid.assign(height, std::vector<int>(width, 0));
+    walkable.assign(height, std::vector<bool>(width, true));
+}
+
+void TileMap::setTile(int col, int row, int tileIdx, bool isWalkable) {
+    if (col >= 0 && col < widthTiles && row >= 0 && row < heightTiles) {
+        tileGrid[row][col] = tileIdx;
+        walkable[row][col] = isWalkable;
+    }
+}
+

@@ -2,12 +2,13 @@
 #include "PauseState.h"
 #include "PlayState.h"
 #include "core/Game.h"
+#include "entities/world_objects/WorldObjects.h"
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
 #include <algorithm>
+#include <random>
 
-// ---- Tileset paths relative to the executable (assets/ is copied next to it) ----
 static const std::string TERRAIN_DIR =
     "assets/textures/terrain/variations/";
 static const std::string WALL_PATH   =
@@ -15,9 +16,7 @@ static const std::string WALL_PATH   =
 static const std::string PLAYER_WALK_DIR =
     "assets/textures/player/walk/";
 
-// =========================================================
-//  Constructor
-// =========================================================
+
 PlayState::PlayState(Game& game)
     : GameState(game)
     , player({mapPixelW() * 0.5f, mapPixelH() * 0.5f})   // spawn at map centre
@@ -27,15 +26,12 @@ PlayState::PlayState(Game& game)
 {
 }
 
-// =========================================================
-//  onEnter
-// =========================================================
+
 void PlayState::onEnter() {
     std::cout << "[PlayState] Entering play state\n";
 
-    // --- Load terrain textures ---
     terrainTiles.clear();
-    // Load up to 4 terrain variation PNGs from the asset folder
+ 
     std::vector<std::string> terrainPaths;
     try {
         for (auto& e : std::filesystem::directory_iterator(TERRAIN_DIR)) {
@@ -55,23 +51,77 @@ void PlayState::onEnter() {
         terrainTiles.push_back(std::move(tv));
     }
 
-    // Fallback: solid colour tiles when no PNGs exist
     if (terrainTiles.empty()) {
         std::cout << "[PlayState] No terrain PNGs found — using colour tiles\n";
     }
 
-    // --- Load wall tile ---
     wallTile.loaded = wallTile.texture.loadFromFile(WALL_PATH);
     wallTile.texture.setSmooth(false);
 
-    // --- Load player walk animation ---
+    // Preload textures for breakable/graphic scenery entities
+    game.getResources().loadTexture("crate", "assets/textures/objects/crate.png");
+    game.getResources().loadTexture("barrel", "assets/textures/objects/barrel.png");
+    game.getResources().loadTexture("tree", "assets/textures/objects/tree.png");
+    game.getResources().loadTexture("bush", "assets/textures/objects/bush.png");
+
     player.loadAnimations(PLAYER_WALK_DIR);
 
-    // --- Build the tile grid + vertex arrays ---
     buildMap();
     buildVertices();
 
-    // --- HUD font ---
+    // Initialize the TileMap backing map with the procedural grid for collision resolution
+    tileMap.initialize(MAP_COLS, MAP_ROWS, TILE_PX);
+    for (int r = 0; r < MAP_ROWS; ++r) {
+        for (int c = 0; c < MAP_COLS; ++c) {
+            bool isWalk = (tileGrid[r][c] != -1);
+            tileMap.setTile(c, r, tileGrid[r][c], isWalk);
+        }
+    }
+
+    // Spawn crates, barrels, trees, and bushes randomly
+    std::vector<sf::Vector2f> spawnPoints;
+    for (int r = 2; r < MAP_ROWS - 2; ++r) {
+        for (int c = 2; c < MAP_COLS - 2; ++c) {
+            // Check if floor tile
+            if (tileGrid[r][c] != -1) {
+                float px = (c + 0.5f) * TILE_PX;
+                float py = (r + 0.5f) * TILE_PX;
+                sf::Vector2f playerPos = player.getPosition();
+                // Skip spawning too close to the player's spawn position (the center)
+                float distSq = (px - playerPos.x) * (px - playerPos.x) + (py - playerPos.y) * (py - playerPos.y);
+                if (distSq > (TILE_PX * 3.f) * (TILE_PX * 3.f)) {
+                    spawnPoints.push_back({px, py});
+                }
+            }
+        }
+    }
+
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(spawnPoints.begin(), spawnPoints.end(), g);
+
+    std::size_t idx = 0;
+    
+    // Spawn 15 breakable boxes (crates)
+    for (int i = 0; i < 15 && idx < spawnPoints.size(); ++i) {
+        entityManager.add(std::make_unique<BreakableBox>(spawnPoints[idx++], game.getResources().getTexture("crate")));
+    }
+
+    // Spawn 8 exploding barrels
+    for (int i = 0; i < 8 && idx < spawnPoints.size(); ++i) {
+        entityManager.add(std::make_unique<ExplodingBarrel>(spawnPoints[idx++], game.getResources().getTexture("barrel")));
+    }
+
+    // Spawn 10 collidable trees
+    for (int i = 0; i < 10 && idx < spawnPoints.size(); ++i) {
+        entityManager.add(std::make_unique<SceneryObject>(spawnPoints[idx++], game.getResources().getTexture("tree"), true));
+    }
+
+    // Spawn 10 non-collidable decorative bushes
+    for (int i = 0; i < 10 && idx < spawnPoints.size(); ++i) {
+        entityManager.add(std::make_unique<SceneryObject>(spawnPoints[idx++], game.getResources().getTexture("bush"), false));
+    }
+
     if (hudFont.openFromFile("assets/fonts/default.ttf")) {
         pauseHint.emplace(hudFont);
         pauseHint->setString("WASD to move   ESC to pause");
@@ -83,26 +133,25 @@ void PlayState::onEnter() {
 
 void PlayState::onExit() {
     std::cout << "[PlayState] Exiting play state\n";
+    entityManager.clear();
 }
 
-// =========================================================
-//  buildMap — fill tileGrid with a simple layout
-// =========================================================
+
 void PlayState::buildMap() {
-    std::srand(42); // fixed seed for reproducible map
+    std::srand(42); 
 
     tileGrid.assign(MAP_ROWS, std::vector<int>(MAP_COLS, 0));
 
     for (int r = 0; r < MAP_ROWS; ++r) {
         for (int c = 0; c < MAP_COLS; ++c) {
-            // Border = wall (tile index -1)
+          
             if (r == 0 || r == MAP_ROWS - 1 || c == 0 || c == MAP_COLS - 1) {
-                tileGrid[r][c] = -1; // wall
+                tileGrid[r][c] = -1; 
             } else {
-                // Random ground variation (0..N-1)
+               
                 int variants = terrainTiles.empty() ? 1
                              : static_cast<int>(terrainTiles.size());
-                // Weighted: 70% tile 0, rest random
+               
                 tileGrid[r][c] = (std::rand() % 10 < 7) ? 0
                                 : (std::rand() % variants);
             }
@@ -110,9 +159,7 @@ void PlayState::buildMap() {
     }
 }
 
-// =========================================================
-//  buildVertices — pre-build sf::VertexArray for fast render
-// =========================================================
+
 void PlayState::buildVertices() {
     // Count ground and wall quads separately
     int groundCount = 0, wallCount = 0;
@@ -126,7 +173,6 @@ void PlayState::buildVertices() {
     wallVerts.setPrimitiveType(sf::PrimitiveType::Triangles);
     wallVerts.resize(static_cast<std::size_t>(wallCount * 6));
 
-    // Helper: fill 2 triangles at base index
     auto fillQuad = [&](sf::VertexArray& va, std::size_t base,
                         float x, float y, float s,
                         float tx, float ty, float ts,
@@ -181,9 +227,6 @@ void PlayState::buildVertices() {
     }
 }
 
-// =========================================================
-//  handleEvent
-// =========================================================
 void PlayState::handleEvent(const sf::Event& event)
 {
     if (const auto* key = event.getIf<sf::Event::KeyPressed>())
@@ -195,9 +238,7 @@ void PlayState::handleEvent(const sf::Event& event)
         }
     }
 }
-// =========================================================
-//  update
-// =========================================================
+
 void PlayState::update(float dt) {
     // Mouse world position (convert screen coords through the camera view)
     game.getWindow().setView(camera);
@@ -205,13 +246,12 @@ void PlayState::update(float dt) {
         sf::Mouse::getPosition(game.getWindow()));
     game.getWindow().setView(game.getWindow().getDefaultView());
 
-    // Let the player face the cursor
+    
     player.setAimTarget(mouseWorld);
 
-    // Input-driven movement
+    
     player.handleInput(game.getInput(), dt);
 
-    // Clamp player inside the walkable area (1 tile border = wall)
     const float margin = static_cast<float>(TILE_PX) + Player::RADIUS;
     sf::Vector2f pos = player.getPosition();
     pos.x = std::max(margin, std::min(pos.x, mapPixelW() - margin));
@@ -219,9 +259,16 @@ void PlayState::update(float dt) {
     player.setPosition(pos);
 
     player.update(dt);
+    entityManager.update(dt);
+
+    // Resolve all collisions (Player & other entities vs tiles, obstacles, etc.)
+    collisionSystem.resolve(entityManager, tileMap, player);
+
+    // Remove dead entities (e.g. broken crates, exploded barrels)
+    entityManager.removeDead();
 
     // Follow camera
-    camera.setCenter(pos);
+    camera.setCenter(player.getPosition());
     clampCamera();
 }
 
@@ -241,15 +288,13 @@ void PlayState::clampCamera() {
 void PlayState::render(sf::RenderTarget& target) {
     target.setView(camera);
 
-    // Draw ground
+    
     if (!terrainTiles.empty()) {
-        // Group tiles by texture and draw in batches
-        // Simple approach: draw each tile type separately
+
         for (std::size_t ti = 0; ti < terrainTiles.size(); ++ti) {
             sf::RenderStates rs;
             rs.texture = terrainTiles[ti].loaded ? &terrainTiles[ti].texture : nullptr;
-            // Build a per-variant vertex array on the fly (small map, OK for now)
-            // For a full game this would be pre-built per variant
+    
             sf::VertexArray va(sf::PrimitiveType::Triangles);
             for (int r = 0; r < MAP_ROWS; ++r) {
                 for (int c = 0; c < MAP_COLS; ++c) {
@@ -280,7 +325,7 @@ void PlayState::render(sf::RenderTarget& target) {
         target.draw(ground);
     }
 
-    // Draw walls
+    
     {
         sf::RenderStates rs;
         rs.texture = wallTile.loaded ? &wallTile.texture : nullptr;
@@ -307,14 +352,17 @@ void PlayState::render(sf::RenderTarget& target) {
         target.draw(va, rs);
     }
 
+    // Draw world entities (crates, barrels, trees, bushes)
+    entityManager.render(target);
+
     // Draw player
     player.render(target);
 
-    // HUD — switch to default view so it's screen-space
+    
     target.setView(target.getDefaultView());
     if (pauseHint) target.draw(*pauseHint);
 
-    // Health bar
+    
     {
         float barW  = 200.f, barH = 16.f, barX = 10.f, barY = 34.f;
         sf::RectangleShape bgBar({barW, barH});

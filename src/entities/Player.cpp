@@ -15,9 +15,6 @@ Player::Player(sf::Vector2f pos)
 }
 Player::~Player() = default;
 
-// =========================================================
-//  loadAnimations
-// =========================================================
 void Player::loadAnimations(const std::string& walkFramesDir) {
     walkFrames.clear();
 
@@ -53,10 +50,6 @@ void Player::loadAnimations(const std::string& walkFramesDir) {
     }
 }
 
-// =========================================================
-//  setAimTarget — still stored for future shooting logic,
-//  but no longer drives the sprite flip
-// =========================================================
 void Player::setAimTarget(sf::Vector2f worldMousePos) {
     sf::Vector2f diff = worldMousePos - position;
     float len = std::sqrt(diff.x * diff.x + diff.y * diff.y);
@@ -64,9 +57,6 @@ void Player::setAimTarget(sf::Vector2f worldMousePos) {
         aimDir = diff / len;
 }
 
-// =========================================================
-//  handleInput — WASD movement + direction tracking
-// =========================================================
 void Player::handleInput(const InputManager& input, float dt) {
     sf::Vector2f dir{ 0.f, 0.f };
 
@@ -80,36 +70,29 @@ void Player::handleInput(const InputManager& input, float dt) {
     if (pressingLeft)  dir.x -= 1.f;
     if (pressingRight) dir.x += 1.f;
 
-    // Update horizontal facing: A/D set it directly; W/S alone keep last
     if (pressingLeft && !pressingRight)
         facingLeft = true;
     else if (pressingRight && !pressingLeft)
         facingLeft = false;
 
-    // Normalise diagonal
     float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
     if (len > 0.f) dir /= len;
 
-    // Only animate when actually pressing a horizontal key (A or D).
-    // Pressing only W or S shows idle pose so sideways sprite doesn't moonwalk.
+  
     movingHorizontal = (pressingLeft || pressingRight);
     moving = (len > 0.f);
     velocity = dir * moveSpeed;
     position += velocity * dt;
 }
 
-// =========================================================
-//  update — animation + sprite flip from movement keys
-// =========================================================
+
 void Player::update(float dt) {
     if (Weapon* w = getCurrentWeapon()) {
         w->update(dt);
     }
 
     if (!walkFrames.empty() && sprite) {
-        // --- Walk animation ---
-        // Only cycle frames when pressing A or D.
-        // Pressing W/S alone keeps frame 0 so the sideways sprite doesn't moonwalk.
+
         if (movingHorizontal) {
             animTimer += dt;
             if (animTimer >= animSpeed) {
@@ -119,22 +102,19 @@ void Player::update(float dt) {
             }
         }
         else {
-            // Idle — reset to frame 0 and clear timer
+
             currentFrame = 0;
             animTimer = 0.f;
             sprite->setTexture(walkFrames[0]);
         }
 
-        // --- Flip sprite based on last A/D key pressed ---
+
         float scaleX = facingLeft ? -3.f : 3.f;
         sprite->setScale({ scaleX, 3.f });
         sprite->setPosition(position);
     }
 }
 
-// =========================================================
-//  render
-// =========================================================
 void Player::render(sf::RenderTarget& target) {
     if (sprite)
         target.draw(*sprite);
@@ -171,9 +151,7 @@ void Player::addHealth(float amount) {
     health = std::min(health + amount, maxHealth);
 }
 
-// =========================================================
-//  Weapons
-// =========================================================
+
 void Player::setWeapons(std::vector<std::unique_ptr<Weapon>> loadout) {
     weapons = std::move(loadout);
     currentWeaponSlot = 0;
@@ -208,12 +186,11 @@ void Player::handleCombat(const InputManager& input, EntityManager& entities) {
     Weapon* weapon = getCurrentWeapon();
     if (!weapon) return;
 
-    // --- Reload ---
+
     if (input.isKeyJustPressed(sf::Keyboard::Key::R)) {
         weapon->startReload();
     }
 
-    // --- Fire (held down; the weapon's own cooldown gates actual rate) ---
     if (input.isMouseButtonPressed(sf::Mouse::Button::Left)) {
         weapon->fire(*this, position, aimDir, entities);
     }
