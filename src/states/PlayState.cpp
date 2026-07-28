@@ -1,3 +1,4 @@
+#include "UpgradeShopState.h"
 #include "GameOverState.h"
 #include "PauseState.h"
 #include "PlayState.h"
@@ -233,9 +234,11 @@ void PlayState::handleEvent(const sf::Event& event)
     {
         if (key->code == sf::Keyboard::Key::Escape)
         {
-            game.getStateManager().pushState(
+            game.getStateManager().changeState(
                 std::make_unique<PauseState>(game));
         }
+
+       
     }
 }
 
