@@ -4,15 +4,15 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <vector>
+#include <array>
+#include <optional>
 #include <string>
 
 class InputManager;
 class EntityManager;
 class Weapon;
 
-// =========================================================
-//  Player — top-down WASD movement, mouse-aim
-// =========================================================
+
 class Player : public Entity {
 public:
     explicit Player(sf::Vector2f pos = { 400.f, 300.f });
@@ -25,12 +25,17 @@ public:
     // Pass the mouse world-position so the player can face the cursor
     void setAimTarget(sf::Vector2f worldMousePos);
 
-    // Load walk frames from a folder
+    // Load walk frames from a folder. Expects filenames that contain
+    // one of "north"/"south"/"east"/"west" AND one of
+    // "idle"/"movement_1"/"movement_2" (case-insensitive, any prefix/suffix ok).
     void loadAnimations(const std::string& walkFramesDir);
 
     void update(float dt) override;
     void render(sf::RenderTarget& target) override;
     sf::FloatRect getBounds() const override;
+
+    // Facing direction (top-down 4-way)
+    enum class Direction { North, South, East, West };
 
     // Accessors
     int          getMoney()     const { return money; }
@@ -38,7 +43,8 @@ public:
     float        getMoveSpeed() const { return moveSpeed; }
     sf::Vector2f getAimDir()    const { return aimDir; }   // unit vec toward cursor (for shooting)
     bool         isMoving()     const { return moving; }
-    bool         isFacingLeft() const { return facingLeft; }
+    bool         isFacingLeft() const { return currentDirection == Direction::West; }
+    Direction    getDirection() const { return currentDirection; }
 
     void addMoney(int amount) { money += amount; }
     void addScore(int amount) { score += amount; }
@@ -63,19 +69,34 @@ public:
     static constexpr float RADIUS = 12.f;
 
 private:
-    // Walk animation
-    std::vector<sf::Texture>  walkFrames;
+    // Per-direction animation frames
+    struct DirectionFrames {
+        sf::Texture idle;
+        sf::Texture move1;
+        sf::Texture move2;
+        bool loaded = false;
+    };
+
+    static constexpr int DIRECTION_COUNT = 4;
+    std::array<DirectionFrames, DIRECTION_COUNT> dirFrames;
+
+    static int dirIndex(Direction d) { return static_cast<int>(d); }
+    DirectionFrames&       framesFor(Direction d)       { return dirFrames[dirIndex(d)]; }
+    const DirectionFrames& framesFor(Direction d) const { return dirFrames[dirIndex(d)]; }
+
     std::optional<sf::Sprite> sprite;
-    int   currentFrame = 0;
+    int   currentFrame = 0;   // 0 = move1, 1 = move2 (toggles while moving)
     float animTimer = 0.f;
     float animSpeed = 0.10f; // seconds per frame
+
+    Direction currentDirection = Direction::South; // spawn facing South, Idle
+
+    void applyTexture(const sf::Texture& tex);
 
     // State
     float        moveSpeed = 160.f;
     sf::Vector2f aimDir = { 1.f, 0.f };  // toward mouse cursor (used for shooting)
     bool         moving = false;
-    bool         movingHorizontal = false;
-    bool         facingLeft = false;       // set by A/D keys
 
     // Stats
     int money = 0;
