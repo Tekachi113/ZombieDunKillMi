@@ -259,6 +259,13 @@ void PlayState::update(float dt) {
     player.setPosition(pos);
 
     player.update(dt);
+    
+    if (!player.isAlive())
+    {
+        game.getStateManager().changeState(
+            std::make_unique<GameOverState>(game));
+        return;
+    }
     entityManager.update(dt);
 
     // Resolve all collisions (Player & other entities vs tiles, obstacles, etc.)
