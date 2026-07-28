@@ -121,18 +121,17 @@ void Player::handleInput(const InputManager& input, float dt) {
     position += velocity * dt;
 
     if (moving) {
-        bool vertical = (pressingUp != pressingDown);   // exactly one of W/S
-        bool horizontal = (pressingLeft != pressingRight); // exactly one of A/D
+        bool vertical = (pressingUp != pressingDown);   
+        bool horizontal = (pressingLeft != pressingRight); 
 
-        // Diagonal input: vertical takes priority over horizontal.
-        // (Swap the order below if you'd rather horizontal win diagonals.)
+     
         if (vertical)
             currentDirection = pressingUp ? Direction::North : Direction::South;
         else if (horizontal)
             currentDirection = pressingLeft ? Direction::West : Direction::East;
-        // else: keys cancel out (e.g. W+S) -> keep currentDirection unchanged
+      
     }
-    // When not moving, currentDirection is simply left as-is (last moving direction).
+   
 }
 
 void Player::applyTexture(const sf::Texture& tex) {
