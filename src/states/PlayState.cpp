@@ -6,6 +6,7 @@
 #include "entities/world_objects/WorldObjects.h"
 #include "world/TileMap.h"
 #include "entities/weapons/WeaponFactory.h"
+#include "entities/weapons/Weapon.h"
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
