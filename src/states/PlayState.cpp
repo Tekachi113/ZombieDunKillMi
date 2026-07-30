@@ -123,13 +123,7 @@ void PlayState::onEnter() {
         entityManager.add(std::make_unique<SceneryObject>(spawnPoints[idx++], game.getResources().getTexture("bush"), false));
     }
 
-    if (hudFont.openFromFile("assets/fonts/default.ttf")) {
-        pauseHint.emplace(hudFont);
-        pauseHint->setString("WASD to move   ESC to pause");
-        pauseHint->setCharacterSize(16);
-        pauseHint->setFillColor(sf::Color(200, 200, 200, 180));
-        pauseHint->setPosition({10.f, 10.f});
-    }
+    hud.load();
 }
 
 void PlayState::onExit() {
@@ -262,7 +256,7 @@ void PlayState::update(float dt) {
     player.setPosition(pos);
 
     player.update(dt);
-    
+    hud.update(player);
     if (!player.isAlive())
     {
         game.getStateManager().changeState(
@@ -298,44 +292,45 @@ void PlayState::clampCamera() {
 void PlayState::render(sf::RenderTarget& target) {
     target.setView(camera);
 
-    
+
     if (!terrainTiles.empty()) {
 
         for (std::size_t ti = 0; ti < terrainTiles.size(); ++ti) {
             sf::RenderStates rs;
             rs.texture = terrainTiles[ti].loaded ? &terrainTiles[ti].texture : nullptr;
-    
+
             sf::VertexArray va(sf::PrimitiveType::Triangles);
             for (int r = 0; r < MAP_ROWS; ++r) {
                 for (int c = 0; c < MAP_COLS; ++c) {
                     if (tileGrid[r][c] != static_cast<int>(ti)) continue;
                     float px = static_cast<float>(c * TILE_PX);
                     float py = static_cast<float>(r * TILE_PX);
-                    float S  = static_cast<float>(TILE_PX);
+                    float S = static_cast<float>(TILE_PX);
                     float ts = terrainTiles[ti].loaded
-                               ? static_cast<float>(terrainTiles[ti].texture.getSize().x)
-                               : S;
+                        ? static_cast<float>(terrainTiles[ti].texture.getSize().x)
+                        : S;
                     sf::Color col = terrainTiles[ti].loaded
-                                  ? sf::Color::White
-                                  : sf::Color(80, 120, 60);
-                    va.append({{px,   py  }, col, {0.f, 0.f}});
-                    va.append({{px+S, py  }, col, {ts,  0.f}});
-                    va.append({{px,   py+S}, col, {0.f, ts }});
-                    va.append({{px+S, py  }, col, {ts,  0.f}});
-                    va.append({{px+S, py+S}, col, {ts,  ts }});
-                    va.append({{px,   py+S}, col, {0.f, ts }});
+                        ? sf::Color::White
+                        : sf::Color(80, 120, 60);
+                    va.append({ {px,   py  }, col, {0.f, 0.f} });
+                    va.append({ {px + S, py  }, col, {ts,  0.f} });
+                    va.append({ {px,   py + S}, col, {0.f, ts } });
+                    va.append({ {px + S, py  }, col, {ts,  0.f} });
+                    va.append({ {px + S, py + S}, col, {ts,  ts } });
+                    va.append({ {px,   py + S}, col, {0.f, ts } });
                 }
             }
             target.draw(va, rs);
         }
-    } else {
+    }
+    else {
         // Fallback: no textures — draw solid green ground
-        sf::RectangleShape ground({mapPixelW(), mapPixelH()});
+        sf::RectangleShape ground({ mapPixelW(), mapPixelH() });
         ground.setFillColor(sf::Color(60, 100, 50));
         target.draw(ground);
     }
 
-    
+
     {
         sf::RenderStates rs;
         rs.texture = wallTile.loaded ? &wallTile.texture : nullptr;
@@ -345,18 +340,18 @@ void PlayState::render(sf::RenderTarget& target) {
                 if (tileGrid[r][c] != -1) continue;
                 float px = static_cast<float>(c * TILE_PX);
                 float py = static_cast<float>(r * TILE_PX);
-                float S  = static_cast<float>(TILE_PX);
+                float S = static_cast<float>(TILE_PX);
                 float ts = wallTile.loaded
-                           ? static_cast<float>(wallTile.texture.getSize().x)
-                           : S;
+                    ? static_cast<float>(wallTile.texture.getSize().x)
+                    : S;
                 sf::Color col = wallTile.loaded ? sf::Color::White
-                                               : sf::Color(50, 35, 20);
-                va.append({{px,   py  }, col, {0.f, 0.f}});
-                va.append({{px+S, py  }, col, {ts,  0.f}});
-                va.append({{px,   py+S}, col, {0.f, ts }});
-                va.append({{px+S, py  }, col, {ts,  0.f}});
-                va.append({{px+S, py+S}, col, {ts,  ts }});
-                va.append({{px,   py+S}, col, {0.f, ts }});
+                    : sf::Color(50, 35, 20);
+                va.append({ {px,   py  }, col, {0.f, 0.f} });
+                va.append({ {px + S, py  }, col, {ts,  0.f} });
+                va.append({ {px,   py + S}, col, {0.f, ts } });
+                va.append({ {px + S, py  }, col, {ts,  0.f} });
+                va.append({ {px + S, py + S}, col, {ts,  ts } });
+                va.append({ {px,   py + S}, col, {0.f, ts } });
             }
         }
         target.draw(va, rs);
@@ -368,22 +363,6 @@ void PlayState::render(sf::RenderTarget& target) {
     // Draw player
     player.render(target);
 
-    
-    target.setView(target.getDefaultView());
-    if (pauseHint) target.draw(*pauseHint);
 
-    
-    {
-        float barW  = 200.f, barH = 16.f, barX = 10.f, barY = 34.f;
-        sf::RectangleShape bgBar({barW, barH});
-        bgBar.setPosition({barX, barY});
-        bgBar.setFillColor(sf::Color(60, 0, 0));
-        target.draw(bgBar);
-
-        float pct = player.getHealth() / player.getMaxHealth();
-        sf::RectangleShape hpBar({barW * pct, barH});
-        hpBar.setPosition({barX, barY});
-        hpBar.setFillColor(sf::Color(220, 40, 40));
-        target.draw(hpBar);
-    }
+    hud.render(target);
 }

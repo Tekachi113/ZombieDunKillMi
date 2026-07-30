@@ -1,5 +1,5 @@
 #pragma once
-
+#include "ui/HUD.h"
 #include "core/StateManager.h"
 #include "entities/Player.h"
 #include "world/EntityManager.h"
@@ -52,8 +52,7 @@ private:
     sf::VertexArray wallVerts;
 
     
-    sf::Font                 hudFont;
-    std::optional<sf::Text>  pauseHint;
+	HUD hud;
 
     // ---- Helpers ----
     void buildMap();
