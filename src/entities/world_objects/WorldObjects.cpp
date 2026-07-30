@@ -1,33 +1,42 @@
 #include "WorldObjects.h"
+#include "../Player.h"
+#include "../../world/EntityManager.h"
+#include "../../world/ParticleSystem.h"
 #include <iostream>
+#include <cmath>
+#include <cstdlib>
 
 // ---- BreakableBox ---------------------------------------
 
-BreakableBox::BreakableBox(sf::Vector2f pos)
+Player* BreakableBox::playerRef = nullptr;
+
+BreakableBox::BreakableBox(sf::Vector2f pos, const sf::Texture& tex)
     : Entity(pos)
+    , sprite(tex)
 {
-    health    = 3.f;  // hits to break
+    health = 3.f;  // hits to break
     maxHealth = 3.f;
+
+    sprite.setScale({ 3.f, 3.f });
+    sf::Vector2u size = tex.getSize();
+    sprite.setOrigin({ size.x * 0.5f, size.y * 0.5f });
+    sprite.setPosition(pos);
 }
 
 void BreakableBox::update(float /*dt*/) {
-    // Static — no update logic
 }
 
 void BreakableBox::render(sf::RenderTarget& target) {
-    sf::RectangleShape rect({SIZE, SIZE});
-    rect.setOrigin({SIZE * 0.5f, SIZE * 0.5f});
-    rect.setPosition(position);
-    rect.setFillColor(sf::Color(139, 90, 43));
-    rect.setOutlineColor(sf::Color(80, 50, 20));
-    rect.setOutlineThickness(2.f);
-    target.draw(rect);
+    target.draw(sprite);
 }
 
 sf::FloatRect BreakableBox::getBounds() const {
+    const sf::Texture& tex = sprite.getTexture();
+    float w = tex.getSize().x * 3.f;
+    float h = tex.getSize().y * 3.f;
     return sf::FloatRect{
-        { position.x - SIZE * 0.5f, position.y - SIZE * 0.5f },
-        { SIZE, SIZE }
+        { position.x - w * 0.5f, position.y - h * 0.5f },
+        { w, h }
     };
 }
 
@@ -36,37 +45,53 @@ void BreakableBox::takeDamage(float amount) {
 }
 
 void BreakableBox::onDeath() {
-    std::cout << "[BreakableBox] Broken — TODO: spawn loot pickup\n";
-    // TODO: Person B — spawn MoneyPickup / AmmoPickup / HealthKitPickup
+    if (playerRef) {
+        int amount = moneyDropMin + (std::rand() % (moneyDropMax - moneyDropMin + 1));
+        playerRef->addMoney(amount);
+        std::cout << "[BreakableBox] Broken — dropped $" << amount << "\n";
+    }
+    else {
+        // setPlayer() was never called at startup — box still breaks
+        // fine, it just can't hand out money. Not a crash, just no loot.
+        std::cout << "[BreakableBox] Broken — no player reference set, no loot given\n";
+    }
+    // NOTE: this grants money instantly on break. Once entities/pickups/
+    // (Person C) exists, swap this for spawning an actual Money pickup
+    // entity at `position` so the player has to walk over to collect it.
 }
 
 // ---- ExplodingBarrel ------------------------------------
 
-ExplodingBarrel::ExplodingBarrel(sf::Vector2f pos)
+EntityManager* ExplodingBarrel::entityManagerRef = nullptr;
+ParticleSystem* ExplodingBarrel::particleSystemRef = nullptr;
+
+ExplodingBarrel::ExplodingBarrel(sf::Vector2f pos, const sf::Texture& tex)
     : Entity(pos)
+    , sprite(tex)
 {
-    health    = 1.f;  // explodes on first hit
+    health = 1.f;  // explodes on first hit
     maxHealth = 1.f;
+
+    sprite.setScale({ 3.f, 3.f });
+    sf::Vector2u size = tex.getSize();
+    sprite.setOrigin({ size.x * 0.5f, size.y * 0.5f });
+    sprite.setPosition(pos);
 }
 
 void ExplodingBarrel::update(float /*dt*/) {
-    // Static — no update logic
 }
 
 void ExplodingBarrel::render(sf::RenderTarget& target) {
-    sf::CircleShape circle(SIZE * 0.5f);
-    circle.setOrigin({SIZE * 0.5f, SIZE * 0.5f});
-    circle.setPosition(position);
-    circle.setFillColor(sf::Color(200, 80, 30));
-    circle.setOutlineColor(sf::Color(120, 40, 10));
-    circle.setOutlineThickness(2.f);
-    target.draw(circle);
+    target.draw(sprite);
 }
 
 sf::FloatRect ExplodingBarrel::getBounds() const {
+    const sf::Texture& tex = sprite.getTexture();
+    float w = tex.getSize().x * 3.f;
+    float h = tex.getSize().y * 3.f;
     return sf::FloatRect{
-        { position.x - SIZE * 0.5f, position.y - SIZE * 0.5f },
-        { SIZE, SIZE }
+        { position.x - w * 0.5f, position.y - h * 0.5f },
+        { w, h }
     };
 }
 
@@ -75,7 +100,117 @@ void ExplodingBarrel::takeDamage(float amount) {
 }
 
 void ExplodingBarrel::onDeath() {
-    std::cout << "[ExplodingBarrel] BOOM — TODO: AoE damage + particle explosion\n";
-    // TODO: CollisionSystem / PlayState: AoE damage in BLAST_RADIUS
-    // TODO: ParticleSystem: emit "explosion" at position
+    std::cout << "[ExplodingBarrel] BOOM at (" << position.x << ", " << position.y << ")\n";
+
+    if (particleSystemRef) {
+        particleSystemRef->emit(position, "explosion", 24);
+    }
+
+    if (entityManagerRef) {
+        for (Entity* e : entityManagerRef->getAll()) {
+            if (e == this || !e->isAlive()) continue;
+
+            sf::Vector2f diff = e->getPosition() - position;
+            float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+            if (dist > BLAST_RADIUS) continue;
+
+            // Linear falloff: full damage at the center, ~0 at the edge.
+            // If this hits another ExplodingBarrel for lethal damage,
+            // Entity::takeDamage() calls its onDeath() too -> automatic
+            // chain reaction, no extra code needed.
+            float falloff = 1.f - (dist / BLAST_RADIUS);
+            e->takeDamage(BLAST_DAMAGE * falloff);
+        }
+    }
+    else {
+        std::cout << "[ExplodingBarrel] No EntityManager reference set — "
+            "explosion is visual only, no AoE damage\n";
+    }
+}
+
+// ---- SceneryObject --------------------------------------
+
+SceneryObject::SceneryObject(sf::Vector2f pos, const sf::Texture& tex, bool collidable)
+    : Entity(pos)
+    , sprite(tex)
+    , collidable(collidable)
+{
+    health = 9999.f; // Invulnerable
+    maxHealth = 9999.f;
+
+    sprite.setScale({ 3.f, 3.f });
+    sf::Vector2u size = tex.getSize();
+    sprite.setOrigin({ size.x * 0.5f, size.y * 0.5f });
+    sprite.setPosition(pos);
+}
+
+void SceneryObject::update(float /*dt*/) {
+}
+
+void SceneryObject::render(sf::RenderTarget& target) {
+    target.draw(sprite);
+}
+
+sf::FloatRect SceneryObject::getBounds() const {
+    if (collidable) {
+        const sf::Texture& tex = sprite.getTexture();
+        float w = tex.getSize().x * 3.f;
+        float h = tex.getSize().y * 3.f;
+        return sf::FloatRect{
+            { position.x - w * 0.5f, position.y - h * 0.5f },
+            { w, h }
+        };
+    }
+    // Return a tiny/null rect if it's not collidable
+    return sf::FloatRect{};
+}
+
+// ---- AnimatedScenery ------------------------------------
+
+AnimatedScenery::AnimatedScenery(sf::Vector2f pos,
+    std::vector<sf::Texture> framesIn,
+    float animSpeedIn,
+    bool  collidableIn)
+    : Entity(pos)
+    , frames(std::move(framesIn))
+    , animSpeed(animSpeedIn)
+    , collidable(collidableIn)
+{
+    health = 9999.f;
+    maxHealth = 9999.f;
+
+    if (!frames.empty()) {
+        sprite.emplace(frames[0]);
+        sprite->setScale({ 3.f, 3.f });
+        auto sz = frames[0].getSize();
+        sprite->setOrigin({ sz.x * 0.5f, sz.y * 0.5f });
+        sprite->setPosition(pos);
+    }
+}
+
+void AnimatedScenery::update(float dt) {
+    if (frames.size() <= 1 || !sprite) return;
+    animTimer += dt;
+    if (animTimer >= animSpeed) {
+        animTimer = 0.f;
+        currentFrame = (currentFrame + 1) % static_cast<int>(frames.size());
+        sprite->setTexture(frames[currentFrame]);
+    }
+}
+
+void AnimatedScenery::render(sf::RenderTarget& target) {
+    if (sprite) target.draw(*sprite);
+}
+
+sf::FloatRect AnimatedScenery::getBounds() const {
+    if (collidable && sprite && !frames.empty()) {
+        auto sz = frames[0].getSize();
+        float w = sz.x * 3.f;
+        float h = sz.y * 3.f;
+        return sf::FloatRect{
+            { position.x - w * 0.5f, position.y - h * 0.5f },
+            { w, h }
+        };
+    }
+    return sf::FloatRect{};
 }
