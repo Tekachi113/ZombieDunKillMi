@@ -5,7 +5,10 @@
 #include "core/Game.h"
 #include "entities/world_objects/WorldObjects.h"
 #include "world/TileMap.h"
+#include "entities/zombies/Zombie.h"
+#include "world/SpawnManager.h"
 #include "entities/weapons/WeaponFactory.h"
+#include "entities/weapons/Weapon.h"
 #include <iostream>
 #include <cstdlib>
 #include <filesystem>
@@ -160,6 +163,18 @@ void PlayState::onEnter() {
     for (int r = 0; r < MAP_ROWS; ++r)
         for (int c = 0; c < MAP_COLS; ++c)
             tileMap.setTile(c, r, tileGrid[r][c], (tileGrid[r][c] != -1));
+    spawnManager.loadWaveConfig("assets/data/wave_config.json");
+
+    spawnManager.startWave(
+        0,
+        sf::FloatRect(
+            { 0.f, 0.f },
+            { mapPixelW(), mapPixelH() }
+        )
+    );
+
+    Zombie::setTarget(&player);
+    Zombie::setEntityManager(&entityManager);
 
     std::random_device rdDev;
     std::mt19937 g(rdDev());
@@ -506,6 +521,7 @@ void PlayState::update(float dt) {
 
     player.update(dt);
     hud.update(player);
+    spawnManager.update(dt, entityManager, player);
     if (!player.isAlive())
     {
         game.getStateManager().changeState(

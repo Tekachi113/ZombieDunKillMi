@@ -1,4 +1,5 @@
 #pragma once
+#include "world/SpawnManager.h"
 #include "ui/HUD.h"
 #include "core/StateManager.h"
 #include "entities/Player.h"
@@ -25,7 +26,7 @@ private:
     // ---- Entities ----
     EntityManager   entityManager;
     CollisionSystem collisionSystem;
-
+    SpawnManager    spawnManager;
     // ---- Camera ----
     sf::View camera;
 
