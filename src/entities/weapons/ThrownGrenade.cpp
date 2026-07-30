@@ -1,6 +1,9 @@
 #include "ThrownGrenade.h"
 #include "../../world/EntityManager.h"
+#include "../../world/ParticleSystem.h"
 #include <cmath>
+
+ParticleSystem* ThrownGrenade::particlesRef = nullptr;
 
 ThrownGrenade::ThrownGrenade(sf::Vector2f pos, sf::Vector2f direction, float throwSpeed,
     float fuseTime, float blastRad, float blastDmg,
@@ -61,6 +64,7 @@ void ThrownGrenade::explode() {
         target->takeDamage(blastDamage);
     }
 
-    // TODO: ParticleSystem::emit("explosion", position) once Person A's
-    // ParticleSystem is wired up — shares the animation with ExplodingBarrel.
+    if (particlesRef) {
+        particlesRef->emit(position, "explosion", 24);
+    }
 }

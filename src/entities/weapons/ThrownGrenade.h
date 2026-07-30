@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 class EntityManager;
+class ParticleSystem;
 
 // The physical grenade flying through the world after Grenade::fire().
 // Travels in a straight line (losing speed for a lobbed feel), then
@@ -24,6 +25,10 @@ public:
     // Safe to call more than once — only the first call has effect.
     void explode();
 
+    // Set once at startup (same pattern as ExplodingBarrel/Zombie) so
+    // grenades can spawn their explosion visual.
+    static void setParticleSystem(ParticleSystem* ps) { particlesRef = ps; }
+
 private:
     // Uses Entity::velocity / Entity::position directly — no shadow members.
     float fuseTimer;
@@ -32,6 +37,8 @@ private:
     EntityManager& entities;
     Entity* owner;
     bool exploded = false;
+
+    static ParticleSystem* particlesRef;
 
     static constexpr float RADIUS = 6.f;
 };
