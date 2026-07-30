@@ -15,10 +15,7 @@ void Projectile::update(float dt) {
     position += direction * speed * dt;
     lifetime -= dt;
     if (lifetime <= 0.f) { alive = false; return; }
-
-    // CollisionSystem only checks Projectile-vs-Zombie (the Player isn't
-    // stored in EntityManager), so an enemy-fired projectile — e.g.
-    // TurretZombie's spit — has to check for a Player hit itself here.
+    
     if (alive && owner && dynamic_cast<Zombie*>(owner)) {
         Entity* player = Zombie::getTarget();
         if (player && player->isAlive() && player != owner) {

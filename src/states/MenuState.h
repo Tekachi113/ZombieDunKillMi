@@ -19,7 +19,7 @@ private:
     std::optional<sf::Text> startText;
     std::optional<sf::Text> quitText;
 
-    // Animated zombie sprite for the background
+    
     std::optional<sf::Sprite> zombieSprite;
     std::vector<sf::Texture> zombieFrames;
     int currentFrame = 0;
@@ -27,10 +27,10 @@ private:
     float animSpeed = 0.15f;
     float zombieX = 0.f;
 
-    // Blinking "Press ENTER" effect
+    
     float blinkTimer = 0.f;
     bool showStartText = true;
 
-    // Button hover
-    int selectedButton = 0; // 0 = start, 1 = quit
+    // Menu navigation
+    int selectedButton = 0; 
 };

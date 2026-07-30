@@ -5,7 +5,7 @@
 #include <cmath>
 #include <memory>
 
-// ---- Static shared state (single-player game) ------------
+// ---- Static shared state (single-player game) -----------
 Entity* Zombie::target = nullptr;
 EntityManager* Zombie::entityManagerRef = nullptr;
 

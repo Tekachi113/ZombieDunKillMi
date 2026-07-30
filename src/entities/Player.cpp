@@ -5,6 +5,7 @@
 #include <iostream>
 #include <filesystem>
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 
 Player::Player(sf::Vector2f pos)
@@ -15,11 +16,17 @@ Player::Player(sf::Vector2f pos)
 }
 Player::~Player() = default;
 
-// =========================================================
-//  loadAnimations
-// =========================================================
+namespace {
+    std::string toLower(const std::string& s) {
+        std::string out = s;
+        std::transform(out.begin(), out.end(), out.begin(),
+            [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        return out;
+    }
+}
+
 void Player::loadAnimations(const std::string& walkFramesDir) {
-    walkFrames.clear();
+    for (auto& df : dirFrames) df = DirectionFrames{};
 
     std::vector<std::string> paths;
     try {
@@ -34,29 +41,58 @@ void Player::loadAnimations(const std::string& walkFramesDir) {
     std::sort(paths.begin(), paths.end());
 
     for (auto& p : paths) {
-        sf::Texture tex;
-        if (tex.loadFromFile(p)) {
-            tex.setSmooth(false);
-            walkFrames.push_back(std::move(tex));
+        std::filesystem::path fp(p);
+        std::string lower = toLower(fp.filename().string());
+
+        Direction dir;
+        if (lower.find("north") != std::string::npos)      dir = Direction::North;
+        else if (lower.find("south") != std::string::npos) dir = Direction::South;
+        else if (lower.find("east") != std::string::npos)  dir = Direction::East;
+        else if (lower.find("west") != std::string::npos)  dir = Direction::West;
+        else {
+            std::cerr << "[Player] Skipping frame with no recognizable direction: " << p << "\n";
+            continue;
         }
+
+        // Check movement_2 / movement_1 before generic "idle" to avoid mismatches.
+        bool isMove2 = lower.find("movement_2") != std::string::npos || lower.find("movement2") != std::string::npos;
+        bool isMove1 = !isMove2 && (lower.find("movement_1") != std::string::npos || lower.find("movement1") != std::string::npos);
+        bool isIdle = !isMove1 && !isMove2 && lower.find("idle") != std::string::npos;
+
+        if (!isMove1 && !isMove2 && !isIdle) {
+            std::cerr << "[Player] Skipping frame with no recognizable pose: " << p << "\n";
+            continue;
+        }
+
+        sf::Texture tex;
+        if (!tex.loadFromFile(p)) {
+            std::cerr << "[Player] Failed to load: " << p << "\n";
+            continue;
+        }
+        tex.setSmooth(false);
+
+        DirectionFrames& df = framesFor(dir);
+        if (isIdle)      df.idle = std::move(tex);
+        else if (isMove1) df.move1 = std::move(tex);
+        else              df.move2 = std::move(tex);
+        df.loaded = true;
     }
 
-    if (!walkFrames.empty()) {
-        sprite.emplace(walkFrames[0]);
+    // Spawn state: facing South, Idle.
+    const DirectionFrames& south = framesFor(Direction::South);
+    if (south.loaded) {
+        sprite.emplace(south.idle);
         sprite->setScale({ 3.f, 3.f });
-        auto sz = walkFrames[0].getSize();
+        auto sz = south.idle.getSize();
         sprite->setOrigin({ sz.x * 0.5f, sz.y * 0.5f });
-        std::cout << "[Player] Loaded " << walkFrames.size() << " walk frames\n";
+        sprite->setPosition(position);
+        std::cout << "[Player] Animations loaded from: " << walkFramesDir << "\n";
     }
     else {
-        std::cerr << "[Player] No walk frames found in: " << walkFramesDir << "\n";
+        std::cerr << "[Player] No South frames found in: " << walkFramesDir << "\n";
     }
 }
 
-// =========================================================
-//  setAimTarget — still stored for future shooting logic,
-//  but no longer drives the sprite flip
-// =========================================================
 void Player::setAimTarget(sf::Vector2f worldMousePos) {
     sf::Vector2f diff = worldMousePos - position;
     float len = std::sqrt(diff.x * diff.x + diff.y * diff.y);
@@ -64,9 +100,6 @@ void Player::setAimTarget(sf::Vector2f worldMousePos) {
         aimDir = diff / len;
 }
 
-// =========================================================
-//  handleInput — WASD movement + direction tracking
-// =========================================================
 void Player::handleInput(const InputManager& input, float dt) {
     sf::Vector2f dir{ 0.f, 0.f };
 
@@ -80,61 +113,63 @@ void Player::handleInput(const InputManager& input, float dt) {
     if (pressingLeft)  dir.x -= 1.f;
     if (pressingRight) dir.x += 1.f;
 
-    // Update horizontal facing: A/D set it directly; W/S alone keep last
-    if (pressingLeft && !pressingRight)
-        facingLeft = true;
-    else if (pressingRight && !pressingLeft)
-        facingLeft = false;
-
-    // Normalise diagonal
     float len = std::sqrt(dir.x * dir.x + dir.y * dir.y);
     if (len > 0.f) dir /= len;
 
-    // Only animate when actually pressing a horizontal key (A or D).
-    // Pressing only W or S shows idle pose so sideways sprite doesn't moonwalk.
-    movingHorizontal = (pressingLeft || pressingRight);
     moving = (len > 0.f);
     velocity = dir * moveSpeed;
     position += velocity * dt;
+
+    if (moving) {
+        bool vertical = (pressingUp != pressingDown);   
+        bool horizontal = (pressingLeft != pressingRight); 
+
+     
+        if (vertical)
+            currentDirection = pressingUp ? Direction::North : Direction::South;
+        else if (horizontal)
+            currentDirection = pressingLeft ? Direction::West : Direction::East;
+      
+    }
+   
 }
 
-// =========================================================
-//  update — animation + sprite flip from movement keys
-// =========================================================
+void Player::applyTexture(const sf::Texture& tex) {
+    if (!sprite) return;
+    sprite->setTexture(tex);
+    auto sz = tex.getSize();
+    sprite->setOrigin({ sz.x * 0.5f, sz.y * 0.5f });
+}
+
 void Player::update(float dt) {
     if (Weapon* w = getCurrentWeapon()) {
         w->update(dt);
     }
 
-    if (!walkFrames.empty() && sprite) {
-        // --- Walk animation ---
-        // Only cycle frames when pressing A or D.
-        // Pressing W/S alone keeps frame 0 so the sideways sprite doesn't moonwalk.
-        if (movingHorizontal) {
-            animTimer += dt;
-            if (animTimer >= animSpeed) {
+    if (sprite) {
+        const DirectionFrames& df = framesFor(currentDirection);
+
+        if (df.loaded) {
+            if (moving) {
+                animTimer += dt;
+                if (animTimer >= animSpeed) {
+                    animTimer = 0.f;
+                    currentFrame = (currentFrame + 1) % 2; // toggle move1 / move2
+                    applyTexture(currentFrame == 0 ? df.move1 : df.move2);
+                }
+            }
+            else {
+                currentFrame = 0;
                 animTimer = 0.f;
-                currentFrame = (currentFrame + 1) % static_cast<int>(walkFrames.size());
-                sprite->setTexture(walkFrames[currentFrame]);
+                applyTexture(df.idle);
             }
         }
-        else {
-            // Idle — reset to frame 0 and clear timer
-            currentFrame = 0;
-            animTimer = 0.f;
-            sprite->setTexture(walkFrames[0]);
-        }
 
-        // --- Flip sprite based on last A/D key pressed ---
-        float scaleX = facingLeft ? -3.f : 3.f;
-        sprite->setScale({ scaleX, 3.f });
+        sprite->setScale({ 3.f, 3.f });
         sprite->setPosition(position);
     }
 }
 
-// =========================================================
-//  render
-// =========================================================
 void Player::render(sf::RenderTarget& target) {
     if (sprite)
         target.draw(*sprite);
@@ -155,7 +190,14 @@ void Player::renderPlaceholder(sf::RenderTarget& target) {
     sf::RectangleShape line({ RADIUS * 1.8f, 2.f });
     line.setFillColor(sf::Color::White);
     line.setPosition(position);
-    float angle = facingLeft ? 180.f : 0.f;
+
+    float angle = 0.f;
+    switch (currentDirection) {
+        case Direction::East:  angle = 0.f;   break;
+        case Direction::South: angle = 90.f;  break;
+        case Direction::West:  angle = 180.f; break;
+        case Direction::North: angle = 270.f; break;
+    }
     line.setRotation(sf::degrees(angle));
     target.draw(line);
 }
@@ -171,9 +213,7 @@ void Player::addHealth(float amount) {
     health = std::min(health + amount, maxHealth);
 }
 
-// =========================================================
-//  Weapons
-// =========================================================
+
 void Player::setWeapons(std::vector<std::unique_ptr<Weapon>> loadout) {
     weapons = std::move(loadout);
     currentWeaponSlot = 0;
@@ -208,12 +248,11 @@ void Player::handleCombat(const InputManager& input, EntityManager& entities) {
     Weapon* weapon = getCurrentWeapon();
     if (!weapon) return;
 
-    // --- Reload ---
+
     if (input.isKeyJustPressed(sf::Keyboard::Key::R)) {
         weapon->startReload();
     }
 
-    // --- Fire (held down; the weapon's own cooldown gates actual rate) ---
     if (input.isMouseButtonPressed(sf::Mouse::Button::Left)) {
         weapon->fire(*this, position, aimDir, entities);
     }

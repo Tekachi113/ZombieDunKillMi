@@ -15,6 +15,10 @@ public:
     //                    "tilesetPath": "...", "tiles": [[...], ...] }
     bool loadFromFile(const std::string& path);
 
+    // Programmatic map setup
+    void initialize(int width, int height, int tileSizePx);
+    void setTile(int col, int row, int tileIdx, bool isWalkable);
+
     // Render only the tiles visible in the current camera view
     void render(sf::RenderTarget& target, const sf::View& camera) const;
 
