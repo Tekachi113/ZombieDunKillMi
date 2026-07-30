@@ -120,3 +120,52 @@ sf::FloatRect SceneryObject::getBounds() const {
     return sf::FloatRect{};
 }
 
+// ---- AnimatedScenery ------------------------------------
+
+AnimatedScenery::AnimatedScenery(sf::Vector2f pos,
+                                  std::vector<sf::Texture> framesIn,
+                                  float animSpeedIn,
+                                  bool  collidableIn)
+    : Entity(pos)
+    , frames(std::move(framesIn))
+    , animSpeed(animSpeedIn)
+    , collidable(collidableIn)
+{
+    health    = 9999.f;
+    maxHealth = 9999.f;
+
+    if (!frames.empty()) {
+        sprite.emplace(frames[0]);
+        sprite->setScale({3.f, 3.f});
+        auto sz = frames[0].getSize();
+        sprite->setOrigin({sz.x * 0.5f, sz.y * 0.5f});
+        sprite->setPosition(pos);
+    }
+}
+
+void AnimatedScenery::update(float dt) {
+    if (frames.size() <= 1 || !sprite) return;
+    animTimer += dt;
+    if (animTimer >= animSpeed) {
+        animTimer = 0.f;
+        currentFrame = (currentFrame + 1) % static_cast<int>(frames.size());
+        sprite->setTexture(frames[currentFrame]);
+    }
+}
+
+void AnimatedScenery::render(sf::RenderTarget& target) {
+    if (sprite) target.draw(*sprite);
+}
+
+sf::FloatRect AnimatedScenery::getBounds() const {
+    if (collidable && sprite && !frames.empty()) {
+        auto sz = frames[0].getSize();
+        float w = sz.x * 3.f;
+        float h = sz.y * 3.f;
+        return sf::FloatRect{
+            { position.x - w * 0.5f, position.y - h * 0.5f },
+            { w, h }
+        };
+    }
+    return sf::FloatRect{};
+}
