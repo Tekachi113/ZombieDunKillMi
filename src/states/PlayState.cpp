@@ -495,6 +495,11 @@ void PlayState::handleEvent(const sf::Event& event)
                 std::make_unique<PauseState>(game));
         }
 
+        if (key->code == sf::Keyboard::Key::U)
+        {
+            game.getStateManager().changeState(
+                std::make_unique<UpgradeShopState>(game));
+        }
     }
 }
 

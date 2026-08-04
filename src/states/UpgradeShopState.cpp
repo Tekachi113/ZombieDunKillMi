@@ -1,6 +1,7 @@
 #include "UpgradeShopState.h"
 #include "PlayState.h"
 #include "core/Game.h"
+#include <memory>
 
 
 UpgradeShopState::UpgradeShopState(Game& game)
@@ -61,16 +62,14 @@ void UpgradeShopState::handleEvent(const sf::Event& event)
 
             if (selectedButton == 3)
             {
-                game.getStateManager().changeState(
-                    std::make_unique<PlayState>(game));
+                game.getStateManager().popState();
             }
 
             break;
 
         case sf::Keyboard::Key::Escape:
 
-            game.getStateManager().changeState(
-                std::make_unique<PlayState>(game));
+            game.getStateManager().popState();
             break;
 
         default:
