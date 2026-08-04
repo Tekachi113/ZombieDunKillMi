@@ -21,6 +21,10 @@ private:
     std::optional<sf::Text> pauseHint;
     std::optional<sf::Text> moneyText;
     std::optional<sf::Text> scoreText;
+    std::optional<sf::Text> weaponText;
+    std::optional<sf::Text> ammoText;
+
+
 
     sf::RectangleShape hpBack;
     sf::RectangleShape hpFront;

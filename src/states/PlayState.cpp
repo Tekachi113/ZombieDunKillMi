@@ -495,7 +495,6 @@ void PlayState::handleEvent(const sf::Event& event)
                 std::make_unique<PauseState>(game));
         }
 
-       
     }
 }
 

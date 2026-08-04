@@ -1,5 +1,6 @@
 #include "HUD.h"
 #include "../entities/Player.h"
+#include "../entities/weapons/Weapon.h"
 
 HUD::HUD()
 {
@@ -21,6 +22,13 @@ bool HUD::load()
     scoreText.emplace(font, "", 18);
     scoreText->setPosition({ 10.f, 85.f });
     scoreText->setFillColor(sf::Color::White);
+    weaponText.emplace(font, "Weapon: -", 18);
+    weaponText->setPosition({ 10.f, 110.f });
+    weaponText->setFillColor(sf::Color::White);
+
+    ammoText.emplace(font, "Ammo: - / -", 18);
+    ammoText->setPosition({ 10.f, 135.f });
+    ammoText->setFillColor(sf::Color::White);
 
     hpBack.setSize({ 200.f, 16.f });
     hpBack.setPosition({ 10.f, 34.f });
@@ -39,6 +47,24 @@ void HUD::update(const Player& player)
 
     scoreText->setString(
         "Score: " + std::to_string(player.getScore()));
+    const Weapon* weapon = player.getCurrentWeapon();
+
+    if (weapon)
+    {
+        weaponText->setString(
+            "Weapon: " + weapon->getName());
+
+        ammoText->setString(
+            "Ammo: " +
+            std::to_string(weapon->getCurrentAmmo()) +
+            " / " +
+            std::to_string(weapon->getReserveAmmo()));
+    }
+    else
+    {
+        weaponText->setString("Weapon: -");
+        ammoText->setString("Ammo: - / -");
+    }
 
     float pct = player.getHealth() / player.getMaxHealth();
 
@@ -52,7 +78,9 @@ void HUD::render(sf::RenderTarget& target)
     if (pauseHint) target.draw(*pauseHint);
     if (moneyText) target.draw(*moneyText);
     if (scoreText) target.draw(*scoreText);
-
+    if (weaponText) target.draw(*weaponText);
+    if (ammoText) target.draw(*ammoText);
     target.draw(hpBack);
     target.draw(hpFront);
+
 }
