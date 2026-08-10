@@ -24,20 +24,40 @@ public:
 
     static void setTarget(Entity* t) { target = t; }
     static void setEntityManager(EntityManager* em) { entityManagerRef = em; }
+    // Set once at startup (same pattern as setTarget/setEntityManager)
+    // so chase() can raycast against walls, not just other entities.
+    static void setTileMap(const class TileMap* map) { tileMapRef = map; }
     static Entity* getTarget() { return target; }
 
 protected:
     float moveSpeed;
     float damage;
-    int   xpReward    = 10;
+    int   xpReward = 10;
     int   moneyReward = 2;
     float attackTimer = 0.f;
-    float attackRate  = 1.f;
+    float attackRate = 1.f;
 
     float meleeRange = RADIUS + 20.f; // how close the target must be to get attacked
 
+    // ---- Line-of-sight obstacle avoidance (see chase()/hasLineOfSight() in .cpp) ----
+    // No real pathfinding here -- when the straight line to the target
+    // is blocked, commit to sidestepping around ONE side until line-of-
+    // sight opens back up (i.e. until it can go straight/diagonally at
+    // the target again), instead of flip-flopping every frame.
+    bool  avoidingObstacle = false;
+    bool  sideStepRight = false;
+    float avoidProgressCheckTimer = 0.f;
+    float avoidDistAtLastCheck = -1.f;
+
+    static constexpr float AVOID_PROBE_DIST = 40.f;  // how far to probe left/right when first blocked
+    static constexpr float AVOID_RECHECK_INTERVAL = 0.4f;  // how often to confirm the chosen side is working
+    static constexpr float AVOID_PROGRESS_MIN = 6.f;   // px expected to close in that time
+
+    bool hasLineOfSight(sf::Vector2f from, sf::Vector2f to) const;
+
     static Entity* target;
     static EntityManager* entityManagerRef;
+    static const class TileMap* tileMapRef;
 
     static constexpr float RADIUS = 14.f;
 };
@@ -66,8 +86,8 @@ public:
 protected:
     void spit(sf::Vector2f targetPos);
 
-    float spitTimer      = 0.f;
-    float spitCooldown   = 2.5f;
+    float spitTimer = 0.f;
+    float spitCooldown = 2.5f;
     float preferredRange = 250.f;
     float spitDamage;
     float spitSpeed = 260.f;
