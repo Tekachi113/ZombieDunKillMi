@@ -24,6 +24,9 @@ public:
 
     static void setTarget(Entity* t) { target = t; }
     static void setEntityManager(EntityManager* em) { entityManagerRef = em; }
+    // Set once at startup (same pattern as setTarget/setEntityManager)
+    // so chase() can raycast against walls, not just other entities.
+    static void setTileMap(const class TileMap* map) { tileMapRef = map; }
     static Entity* getTarget() { return target; }
 
 protected:
@@ -36,21 +39,25 @@ protected:
 
     float meleeRange = RADIUS + 20.f; // how close the target must be to get attacked
 
-    // ---- Obstacle-stuck detection (see chase() in .cpp) ----
-    // No real pathfinding here -- these let chase() notice when it's
-    // making no progress toward the target (blocked by an obstacle)
-    // and sidestep around it instead of vibrating in place forever.
-    float stuckCheckTimer = 0.f;
-    float distAtLastCheck = -1.f;
-    float stuckFor = 0.f;
+    // ---- Line-of-sight obstacle avoidance (see chase()/hasLineOfSight() in .cpp) ----
+    // No real pathfinding here -- when the straight line to the target
+    // is blocked, commit to sidestepping around ONE side until line-of-
+    // sight opens back up (i.e. until it can go straight/diagonally at
+    // the target again), instead of flip-flopping every frame.
+    bool  avoidingObstacle = false;
     bool  sideStepRight = false;
+    float avoidProgressCheckTimer = 0.f;
+    float avoidDistAtLastCheck = -1.f;
 
-    static constexpr float STUCK_CHECK_INTERVAL = 0.35f; // how often to sample progress
-    static constexpr float STUCK_PROGRESS_MIN = 8.f;   // px expected to close in that time
-    static constexpr float STUCK_TRIGGER_TIME = 0.7f;  // how long "no progress" before sidestepping
+    static constexpr float AVOID_PROBE_DIST = 40.f;  // how far to probe left/right when first blocked
+    static constexpr float AVOID_RECHECK_INTERVAL = 0.4f;  // how often to confirm the chosen side is working
+    static constexpr float AVOID_PROGRESS_MIN = 6.f;   // px expected to close in that time
+
+    bool hasLineOfSight(sf::Vector2f from, sf::Vector2f to) const;
 
     static Entity* target;
     static EntityManager* entityManagerRef;
+    static const class TileMap* tileMapRef;
 
     static constexpr float RADIUS = 14.f;
 };
