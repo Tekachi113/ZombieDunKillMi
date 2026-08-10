@@ -9,7 +9,6 @@
 Entity* Zombie::target = nullptr;
 EntityManager* Zombie::entityManagerRef = nullptr;
 
-
 // ---- Zombie base ----------------------------------------
 
 Zombie::Zombie(sf::Vector2f pos, float hp, float spd, float dmg)
@@ -55,11 +54,49 @@ sf::FloatRect Zombie::getBounds() const {
 
 void Zombie::chase(sf::Vector2f targetPos, float dt) {
     sf::Vector2f diff = targetPos - position;
-    float len = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-    if (len > 0.f) {
-        sf::Vector2f dir = diff / len;
-        position += dir * moveSpeed * dt;
+    float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+    if (dist < 1.f) return;
+
+    sf::Vector2f dir = diff / dist;
+
+    // ---- Obstacle-stuck detection ----
+    // chase() has no real pathfinding -- it just walks straight at the
+    // target. If a wall/box/barrel sits directly in the way,
+    // CollisionSystem pushes the zombie back out every frame it tries
+    // to walk through, so it just vibrates in place forever. Every
+    // STUCK_CHECK_INTERVAL seconds, check whether distance-to-target
+    // actually shrank; if it hasn't, blend in a perpendicular sidestep
+    // so the push-back has room to slide the zombie around the obstacle
+    // instead of straight back where it came from.
+    stuckCheckTimer += dt;
+    if (stuckCheckTimer >= STUCK_CHECK_INTERVAL) {
+        if (distAtLastCheck >= 0.f && (distAtLastCheck - dist) < STUCK_PROGRESS_MIN) {
+            stuckFor += stuckCheckTimer;
+        } else {
+            stuckFor = 0.f;
+        }
+        distAtLastCheck = dist;
+        stuckCheckTimer = 0.f;
+
+        // Flip which side to sidestep toward periodically so it doesn't
+        // keep sidestepping into the same dead end, and so two zombies
+        // stuck on the same corner don't mirror each other forever.
+        if (stuckFor > STUCK_TRIGGER_TIME * 2.f) {
+            sideStepRight = !sideStepRight;
+            stuckFor = STUCK_TRIGGER_TIME;
+        }
     }
+
+    sf::Vector2f moveDir = dir;
+    if (stuckFor >= STUCK_TRIGGER_TIME) {
+        sf::Vector2f perp = sideStepRight ? sf::Vector2f(-dir.y, dir.x)
+                                           : sf::Vector2f(dir.y, -dir.x);
+        moveDir = dir * 0.5f + perp;
+        float len = std::sqrt(moveDir.x * moveDir.x + moveDir.y * moveDir.y);
+        if (len > 0.0001f) moveDir /= len;
+    }
+
+    position += moveDir * moveSpeed * dt;
 }
 
 void Zombie::attack(Entity& target) {
