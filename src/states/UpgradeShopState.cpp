@@ -2,10 +2,12 @@
 #include "PlayState.h"
 #include "core/Game.h"
 #include <memory>
+#include "entities/Player.h"
+#include <string>
 
 
-UpgradeShopState::UpgradeShopState(Game& game)
-    : GameState(game)
+UpgradeShopState::UpgradeShopState(Game& game, Player& player)
+    : GameState(game), player(player)
 {
 }
 
@@ -20,18 +22,23 @@ void UpgradeShopState::onEnter()
     titleText.emplace(font, "UPGRADE SHOP", 42);
     titleText->setPosition({420.f, 120.f});
 
-    hpText.emplace(font, "Increase HP", 32);
+    hpText.emplace(font, "Increase HP - $50", 32);
     hpText->setPosition({460.f, 250.f});
 
-    damageText.emplace(font, "Increase Damage", 32);
+    damageText.emplace(font, "Increase Damage - $100", 32);
     damageText->setPosition({460.f, 310.f});
 
-    speedText.emplace(font, "Increase Speed", 32);
+    speedText.emplace(font, "Increase Speed - $50", 32);
     speedText->setPosition({460.f, 370.f});
 
     backText.emplace(font, "Back", 32);
     backText->setPosition({460.f, 430.f});
 
+    moneyText.emplace(font, "Money: 0", 28);
+    moneyText->setPosition({ 460.f, 500.f });
+
+    messageText.emplace(font, "", 24);
+    messageText->setPosition({ 460.f, 550.f });
     updateSelection();
 }
 
@@ -60,8 +67,23 @@ void UpgradeShopState::handleEvent(const sf::Event& event)
         case sf::Keyboard::Key::Enter:
         case sf::Keyboard::Key::Space:
 
-            if (selectedButton == 3)
+            if (selectedButton == 0)
             {
+                // Upgrade HP
+                if (player.getMoney() >= 50)
+                {
+                    player.addMoney(-50);
+                    player.increaseMaxHealth(20.f);
+                    messageText->setString("HP upgraded!");
+                }
+                else
+                {
+                    messageText->setString("Not enough money!");
+                }
+            }
+            else if (selectedButton == 3)
+            {
+                // Back
                 game.getStateManager().popState();
             }
 
@@ -80,6 +102,11 @@ void UpgradeShopState::handleEvent(const sf::Event& event)
 
 void UpgradeShopState::update(float dt)
 {
+    if (moneyText)
+    {
+        moneyText->setString(
+            "Money: " + std::to_string(player.getMoney()));
+    }
 }
 
 void UpgradeShopState::render(sf::RenderTarget& target)
@@ -91,6 +118,9 @@ void UpgradeShopState::render(sf::RenderTarget& target)
     if (damageText) target.draw(*damageText);
     if (speedText) target.draw(*speedText);
     if (backText) target.draw(*backText);
+    if (moneyText) target.draw(*moneyText);
+    if (messageText) target.draw(*messageText);
+     
 }
 void UpgradeShopState::updateSelection()
 {

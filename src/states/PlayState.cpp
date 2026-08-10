@@ -497,8 +497,8 @@ void PlayState::handleEvent(const sf::Event& event)
 
         if (key->code == sf::Keyboard::Key::U)
         {
-            game.getStateManager().changeState(
-                std::make_unique<UpgradeShopState>(game));
+            game.getStateManager().pushState(
+                std::make_unique<UpgradeShopState>(game, player));
         }
     }
 }
@@ -541,7 +541,7 @@ void PlayState::update(float dt) {
     entityManager.removeDead();
 
     // Follow camera
-    camera.setCenter(player.getPosition());
+    camera.setCenter(player.getPosition()); 
     clampCamera();
 }
 

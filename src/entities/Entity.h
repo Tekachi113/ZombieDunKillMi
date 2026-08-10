@@ -23,6 +23,11 @@ public:
     bool  isAlive()      const { return alive; }
     float getHealth()    const { return health; }
     float getMaxHealth() const { return maxHealth; }
+    void increaseMaxHealth(float amount)
+    {
+        maxHealth += amount;
+        health = maxHealth;
+    }
 
     // Position helpers
     sf::Vector2f getPosition() const { return position; }

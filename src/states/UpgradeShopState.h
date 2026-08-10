@@ -3,11 +3,11 @@
 #include "core/StateManager.h"
 #include <SFML/Graphics.hpp>
 #include <optional>
-
+class Player;
 class UpgradeShopState : public GameState
 {
 public:
-    explicit UpgradeShopState(Game& game);
+    UpgradeShopState(Game& game, Player& player);
 
     void handleEvent(const sf::Event& event) override;
     void update(float dt) override;
@@ -15,6 +15,7 @@ public:
     void onEnter() override;
 
 private:
+    Player& player;
     sf::Font font;
 
     std::optional<sf::Text> titleText;
@@ -22,6 +23,8 @@ private:
     std::optional<sf::Text> damageText;
     std::optional<sf::Text> speedText;
     std::optional<sf::Text> backText;
+    std::optional<sf::Text> moneyText;
+    std::optional<sf::Text> messageText;
 
     int selectedButton = 0;
 
