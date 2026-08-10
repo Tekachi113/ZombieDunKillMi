@@ -4,6 +4,7 @@
 #include <memory>
 #include "entities/Player.h"
 #include <string>
+#include "entities/weapons/Weapon.h"
 
 
 UpgradeShopState::UpgradeShopState(Game& game, Player& player)
@@ -75,6 +76,39 @@ void UpgradeShopState::handleEvent(const sf::Event& event)
                     player.addMoney(-50);
                     player.increaseMaxHealth(20.f);
                     messageText->setString("HP upgraded!");
+                }
+                else
+                {
+                    messageText->setString("Not enough money!");
+                }
+            }
+            else if (selectedButton == 1)
+            {
+                // Upgrade Damage
+                if (player.getMoney() >= 100)
+                {
+                    Weapon* weapon = player.getCurrentWeapon();
+
+                    if (weapon)
+                    {
+                        player.addMoney(-100);
+                        weapon->setDamage(weapon->getDamage() + 10.f);
+                        messageText->setString("Damage upgraded!");
+                    }
+                }
+                else
+                {
+                    messageText->setString("Not enough money!");
+                }
+            }
+            else if (selectedButton == 2)
+            {
+                // Upgrade Speed
+                if (player.getMoney() >= 50)
+                {
+                    player.addMoney(-50);
+                    player.setMoveSpeed(player.getMoveSpeed() + 20.f);
+                    messageText->setString("Speed upgraded!");
                 }
                 else
                 {

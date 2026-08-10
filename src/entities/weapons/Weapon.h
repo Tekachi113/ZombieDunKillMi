@@ -49,6 +49,7 @@ public:
 
     const std::string& getName()        const { return name; }
     float               getDamage()      const { return damage; }
+    void                setDamage(float value) { damage = value; }
     int                 getCurrentAmmo() const { return currentAmmo; }
     int                 getReserveAmmo() const { return reserveAmmo; }
     int                 getMagazineSize()const { return magazineSize; }

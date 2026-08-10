@@ -49,6 +49,7 @@ public:
     void addMoney(int amount) { money += amount; }
     void addScore(int amount) { score += amount; }
     void addHealth(float amount);
+    void setMoveSpeed(float speed) { moveSpeed = speed; }
 
     // --- Weapons ---------------------------------------------------
     // Give the player its starting loadout (or replace it wholesale,
