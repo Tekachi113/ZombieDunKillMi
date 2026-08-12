@@ -66,6 +66,10 @@ public:
     const Weapon* getCurrentWeapon() const;
     int           getCurrentWeaponSlot() const { return currentWeaponSlot; }
 
+    // Refills reserve ammo for every carried weapon that isn't melee
+    // (i.e. magazineSize > 0). Used by AmmoPickup on collection.
+    void refillAllAmmo(int amount);
+
     static constexpr int   WEAPON_SLOTS = 4;
     static constexpr float RADIUS = 12.f;
 

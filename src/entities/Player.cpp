@@ -226,6 +226,16 @@ void Player::switchWeapon(int slotIndex) {
     currentWeaponSlot = slotIndex;
 }
 
+void Player::refillAllAmmo(int amount) {
+    for (auto& w : weapons) {
+        // magazineSize <= 0 marks a weapon as melee/ammo-less (see
+        // Knife's constructor) -- skip those, refill everything else.
+        if (w && w->getMagazineSize() > 0) {
+            w->addReserveAmmo(amount);
+        }
+    }
+}
+
 Weapon* Player::getCurrentWeapon() {
     if (currentWeaponSlot < 0 || currentWeaponSlot >= static_cast<int>(weapons.size()))
         return nullptr;

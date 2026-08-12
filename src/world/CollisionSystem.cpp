@@ -6,6 +6,7 @@
 #include "../entities/zombies/Zombie.h"
 #include "../entities/Projectile.h"
 #include "../entities/world_objects/WorldObjects.h"
+#include "../entities/pickups/AmmoPickup.h"
 #include <cmath>
 
 
@@ -133,10 +134,19 @@ void CollisionSystem::resolveEntityCollisions(EntityManager& entities, Player& p
     }
 
     // 2. Player vs all other entities
+    // 2. Player vs all other entities
     if (player.isAlive()) {
         for (Entity* e : all) {
             if (!e->isAlive()) continue;
             if (!aabbOverlap(player.getBounds(), e->getBounds())) continue;
+
+            // Player picks up ammo (refills every non-melee weapon, then
+            // the pickup marks itself dead so it can't be collected twice)
+            if (auto* ammo = dynamic_cast<AmmoPickup*>(e)) {
+                player.refillAllAmmo(ammo->getRefillAmount());
+                ammo->collect();
+                continue;
+            }
 
             // Player vs Solid Obstacle (crates, barrels, trees)
             if (isSolidObstacle(e)) {
