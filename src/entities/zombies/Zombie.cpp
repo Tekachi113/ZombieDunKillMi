@@ -40,29 +40,110 @@ Zombie::Zombie(sf::Vector2f pos, float hp, float spd, float dmg)
     maxHealth = hp;
 }
 
-void Zombie::update(float dt) {
-    attackTimer += dt;
+void Zombie::loadWalkAnimation(const std::string& type) {
+    walkFrames.clear();
+    damagedFrames.clear();
 
-    if (!target || !target->isAlive()) return;
-
-    sf::Vector2f diff = target->getPosition() - position;
-    float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
-
-    if (dist <= meleeRange) {
-        attack(*target);
+    // Sequential files: assets/textures/zombies/<type>/walk_0.png,
+    // walk_1.png, ... stop at the first one that fails to load.
+    const std::string walkPrefix = "assets/textures/zombies/" + type + "/walk_";
+    for (int i = 0; ; ++i) {
+        sf::Texture tex;
+        if (!tex.loadFromFile(walkPrefix + std::to_string(i) + ".png")) break;
+        walkFrames.push_back(std::move(tex));
     }
-    else {
-        chase(target->getPosition(), dt);
+
+    // Same pattern for the hit-reaction frames: damaged_0.png, ...
+    // Optional -- if missing, takeDamage() just keeps playing the walk
+    // animation instead of flashing.
+    const std::string damagedPrefix = "assets/textures/zombies/" + type + "/damaged_";
+    for (int i = 0; ; ++i) {
+        sf::Texture tex;
+        if (!tex.loadFromFile(damagedPrefix + std::to_string(i) + ".png")) break;
+        damagedFrames.push_back(std::move(tex));
+    }
+
+    if (walkFrames.empty()) {
+        std::cout << "[Zombie] No walk animation found for type \"" << type
+                   << "\" -- using placeholder circle\n";
+        return;
+    }
+
+    sprite.emplace(walkFrames[0]);
+    sf::Vector2u size = walkFrames[0].getSize();
+    sprite->setOrigin({ size.x * 0.5f, size.y * 0.5f });
+    sprite->setPosition(position);
+    sprite->setScale({ 3.f, 3.f });
+}
+
+void Zombie::takeDamage(float amount) {
+    Entity::takeDamage(amount);
+    if (!damagedFrames.empty()) {
+        damagedFlashTimer = DAMAGED_FLASH_DURATION;
+        currentFrame = 0;
+        animTimer = 0.f;
     }
 }
 
+void Zombie::updateAnimation(float dt) {
+    if (walkFrames.empty() || !sprite) return;
+
+    // While flashing "damaged", play those frames instead of the walk
+    // loop; once the timer runs out, resume walking from frame 0.
+    const std::vector<sf::Texture>& frames =
+        (damagedFlashTimer > 0.f && !damagedFrames.empty()) ? damagedFrames : walkFrames;
+
+    if (damagedFlashTimer > 0.f) {
+        damagedFlashTimer -= dt;
+        if (damagedFlashTimer <= 0.f) {
+            currentFrame = 0;
+            animTimer = 0.f;
+        }
+    }
+
+    animTimer += dt;
+    if (animTimer >= animSpeed) {
+        animTimer -= animSpeed;
+        currentFrame = (currentFrame + 1) % static_cast<int>(frames.size());
+    }
+
+    sprite->setTexture(frames[currentFrame % frames.size()], true);
+    sprite->setPosition(position);
+    sprite->setScale({ 3.f * facing, 3.f });
+}
+
+void Zombie::update(float dt) {
+    attackTimer += dt;
+
+    if (target && target->isAlive()) {
+        sf::Vector2f diff = target->getPosition() - position;
+        float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+
+        if (dist <= meleeRange) {
+            attack(*target);
+        }
+        else {
+            chase(target->getPosition(), dt);
+        }
+    }
+
+    updateAnimation(dt);
+}
+
 void Zombie::render(sf::RenderTarget& target) {
-    // Placeholder: coloured circle
-    sf::CircleShape circle(RADIUS);
-    circle.setOrigin({ RADIUS, RADIUS });
-    circle.setPosition(position);
-    circle.setFillColor(sf::Color(0, 180, 0));
-    target.draw(circle);
+    if (sprite) {
+        target.draw(*sprite);
+    }
+    else {
+        // Placeholder used only if this type's walk animation failed to
+        // load (missing art files) -- keeps the game playable/visible
+        // instead of crashing or rendering nothing.
+        sf::CircleShape circle(RADIUS);
+        circle.setOrigin({ RADIUS, RADIUS });
+        circle.setPosition(position);
+        circle.setFillColor(sf::Color(0, 180, 0));
+        target.draw(circle);
+    }
 }
 
 sf::FloatRect Zombie::getBounds() const {
@@ -160,6 +241,9 @@ void Zombie::chase(sf::Vector2f targetPos, float dt) {
     }
 
     position += moveDir * moveSpeed * dt;
+    if (std::abs(moveDir.x) > 0.001f) {
+        facing = (moveDir.x < 0.f) ? -1.f : 1.f;
+    }
 }
 
 void Zombie::attack(Entity& target) {
@@ -181,6 +265,7 @@ SmallZombie::SmallZombie(sf::Vector2f pos)
     xpReward = 10;
     moneyReward = 2;
     attackRate = 1.0f;
+    loadWalkAnimation("small");
 }
 
 MediumZombie::MediumZombie(sf::Vector2f pos)
@@ -189,6 +274,7 @@ MediumZombie::MediumZombie(sf::Vector2f pos)
     xpReward = 20;
     moneyReward = 4;
     attackRate = 0.9f;
+    loadWalkAnimation("medium");
 }
 
 BigZombie::BigZombie(sf::Vector2f pos)
@@ -197,6 +283,7 @@ BigZombie::BigZombie(sf::Vector2f pos)
     xpReward = 50;
     moneyReward = 8;
     attackRate = 0.5f;
+    loadWalkAnimation("big");
 }
 
 TurretZombie::TurretZombie(sf::Vector2f pos)
@@ -207,31 +294,37 @@ TurretZombie::TurretZombie(sf::Vector2f pos)
     attackRate = 0.4f;
     spitDamage = damage; // reuse the base "damage" stat for the projectile
     meleeRange = 0.f;    // turret never melees — it only ever spits
+    loadWalkAnimation("turret");
 }
 
 void TurretZombie::update(float dt) {
     attackTimer += dt;
     spitTimer += dt;
 
-    if (!target || !target->isAlive()) return;
+    if (target && target->isAlive()) {
+        sf::Vector2f diff = target->getPosition() - position;
+        float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
 
-    sf::Vector2f diff = target->getPosition() - position;
-    float dist = std::sqrt(diff.x * diff.x + diff.y * diff.y);
+        // Keep roughly `preferredRange` away: close in if too far, back off if too close.
+        if (dist > preferredRange) {
+            chase(target->getPosition(), dt);
+        }
+        else if (dist < preferredRange * 0.7f && dist > 0.001f) {
+            sf::Vector2f awayDir = -diff / dist;
+            position += awayDir * moveSpeed * dt;
+            if (std::abs(awayDir.x) > 0.001f) {
+                facing = (awayDir.x < 0.f) ? -1.f : 1.f;
+            }
+        }
 
-    // Keep roughly `preferredRange` away: close in if too far, back off if too close.
-    if (dist > preferredRange) {
-        chase(target->getPosition(), dt);
-    }
-    else if (dist < preferredRange * 0.7f && dist > 0.001f) {
-        sf::Vector2f awayDir = -diff / dist;
-        position += awayDir * moveSpeed * dt;
+        // Spit whenever the target is roughly in range, on its own cooldown
+        if (dist <= preferredRange * 1.3f && spitTimer >= spitCooldown) {
+            spitTimer = 0.f;
+            spit(target->getPosition());
+        }
     }
 
-    // Spit whenever the target is roughly in range, on its own cooldown
-    if (dist <= preferredRange * 1.3f && spitTimer >= spitCooldown) {
-        spitTimer = 0.f;
-        spit(target->getPosition());
-    }
+    updateAnimation(dt);
 }
 
 void TurretZombie::spit(sf::Vector2f targetPos) {

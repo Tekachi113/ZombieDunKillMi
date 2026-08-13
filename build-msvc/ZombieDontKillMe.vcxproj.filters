@@ -1,0 +1,240 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\GameLTNC\src\core\Game.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\core\InputManager.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\core\ResourceManager.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\core\StateManager.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\AnimatedSprite.cpp">
+      <Filter>Source Files\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\Entity.cpp">
+      <Filter>Source Files\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\Player.cpp">
+      <Filter>Source Files\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\Projectile.cpp">
+      <Filter>Source Files\entities</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\pickups\AmmoPickup.cpp">
+      <Filter>Source Files\entities\pickups</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\pickups\AmmoSpawner.cpp">
+      <Filter>Source Files\entities\pickups</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\weapons\Grenade.cpp">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\weapons\Knife.cpp">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\weapons\Pistol.cpp">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\weapons\Shotgun.cpp">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\weapons\ThrownGrenade.cpp">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\weapons\Weapon.cpp">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\weapons\WeaponFactory.cpp">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\world_objects\WorldObjects.cpp">
+      <Filter>Source Files\entities\world_objects</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\zombies\TurretZombie.cpp">
+      <Filter>Source Files\entities\zombies</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\zombies\Zombie.cpp">
+      <Filter>Source Files\entities\zombies</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\entities\zombies\ZombieFactory.cpp">
+      <Filter>Source Files\entities\zombies</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\states\GameOverState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\states\MenuState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\states\PauseState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\states\PlayState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\states\UpgradeShopState.cpp">
+      <Filter>Source Files\states</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\ui\HUD.cpp">
+      <Filter>Source Files\ui</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\world\CollisionSystem.cpp">
+      <Filter>Source Files\world</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\world\EntityManager.cpp">
+      <Filter>Source Files\world</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\world\ParticleSystem.cpp">
+      <Filter>Source Files\world</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\world\SpawnManager.cpp">
+      <Filter>Source Files\world</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\GameLTNC\src\world\TileMap.cpp">
+      <Filter>Source Files\world</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\GameLTNC\src\core\Game.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\core\InputManager.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\core\ResourceManager.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\core\StateManager.h">
+      <Filter>Source Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\AnimatedSprite.h">
+      <Filter>Source Files\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\Entity.h">
+      <Filter>Source Files\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\Player.h">
+      <Filter>Source Files\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\Projectile.h">
+      <Filter>Source Files\entities</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\pickups\AmmoPickup.h">
+      <Filter>Source Files\entities\pickups</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\pickups\AmmoSpawner.h">
+      <Filter>Source Files\entities\pickups</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\weapons\Grenade.h">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\weapons\Knife.h">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\weapons\Pistol.h">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\weapons\Shotgun.h">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\weapons\ThrownGrenade.h">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\weapons\Weapon.h">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\weapons\WeaponFactory.h">
+      <Filter>Source Files\entities\weapons</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\world_objects\WorldObjects.h">
+      <Filter>Source Files\entities\world_objects</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\zombies\TurretZombie.h">
+      <Filter>Source Files\entities\zombies</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\zombies\Zombie.h">
+      <Filter>Source Files\entities\zombies</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\entities\zombies\ZombieFactory.h">
+      <Filter>Source Files\entities\zombies</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\states\GameOverState.h">
+      <Filter>Source Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\states\MenuState.h">
+      <Filter>Source Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\states\PauseState.h">
+      <Filter>Source Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\states\PlayState.h">
+      <Filter>Source Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\states\UpgradeShopState.h">
+      <Filter>Source Files\states</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\ui\HUD.h">
+      <Filter>Source Files\ui</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\world\CollisionSystem.h">
+      <Filter>Source Files\world</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\world\EntityManager.h">
+      <Filter>Source Files\world</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\world\ParticleSystem.h">
+      <Filter>Source Files\world</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\world\SpawnManager.h">
+      <Filter>Source Files\world</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\GameLTNC\src\world\TileMap.h">
+      <Filter>Source Files\world</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\GameLTNC\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="C:\GameLTNC\build-msvc\vcpkg_installed\x64-windows\share\nlohmann_json\nlohmann_json.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{048F1588-D9AF-33EE-BCCF-ACD6A0A31A5B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{E3EE2518-7E62-39DF-892B-F40A82A61B41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\entities">
+      <UniqueIdentifier>{F4C09DF0-B956-36E5-B071-737227CF2626}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\entities\pickups">
+      <UniqueIdentifier>{B74317DB-7C24-30F3-A7FF-984259CF785B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\entities\weapons">
+      <UniqueIdentifier>{5C0DE76A-AE56-3274-8D8B-9728DCD8749B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\entities\world_objects">
+      <UniqueIdentifier>{8C42780A-4CE2-303B-B883-99D3806CD455}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\entities\zombies">
+      <UniqueIdentifier>{41C0F3E2-A3B0-3BA1-9F02-ECFD594BBB10}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\states">
+      <UniqueIdentifier>{B9AF9C2D-A6B5-3D03-89C7-4E2301D35F4E}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ui">
+      <UniqueIdentifier>{7BBB41AD-A258-3584-9424-5A9E7513F22C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\world">
+      <UniqueIdentifier>{F9FD48EE-8B1C-3C51-BFF0-8A680BCB9F07}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

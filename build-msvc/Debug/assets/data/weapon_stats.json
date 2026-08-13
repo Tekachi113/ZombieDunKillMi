@@ -1,0 +1,52 @@
+{
+  "weapons": {
+    "knife": {
+      "displayName":  "Knife",
+      "type":         "melee",
+      "damage":       40,
+      "attackRate":   2.0,
+      "range":        60,
+      "swingArc":     90,
+      "ammoType":     "none",
+      "magazineSize": 0,
+      "reloadTime":   0.0
+    },
+    "pistol": {
+      "displayName":      "Pistol",
+      "type":             "ranged",
+      "damage":           25,
+      "fireRate":         2.5,
+      "projectileSpeed":  500,
+      "spread":           3,
+      "ammoType":         "small",
+      "magazineSize":     12,
+      "reserveAmmo":      48,
+      "reloadTime":       1.2
+    },
+    "shotgun": {
+      "displayName":      "Shotgun",
+      "type":             "ranged",
+      "damage":           18,
+      "pelletsPerShot":   6,
+      "fireRate":         0.8,
+      "projectileSpeed":  450,
+      "spread":           20,
+      "ammoType":         "medium",
+      "magazineSize":     6,
+      "reserveAmmo":      24,
+      "reloadTime":       2.0
+    },
+    "grenade": {
+      "displayName":  "Grenade",
+      "type":         "thrown",
+      "damage":       120,
+      "blastRadius":  100,
+      "fuseTime":     2.0,
+      "throwSpeed":   400,
+      "ammoType":     "big",
+      "magazineSize": 1,
+      "reserveAmmo":  3,
+      "reloadTime":   0.5
+    }
+  }
+}
