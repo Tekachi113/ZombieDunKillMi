@@ -5,10 +5,14 @@
 #include <iostream>
 #include <cmath>
 #include <cstdlib>
+#include "../pickups/HealthKit.h"
+#include "../pickups/MoneyPickup.h"
+#include "../pickups/ShieldPickup.h"
 
 // ---- BreakableBox ---------------------------------------
 
 Player* BreakableBox::playerRef = nullptr;
+EntityManager* BreakableBox::entityManagerRef = nullptr;
 
 BreakableBox::BreakableBox(sf::Vector2f pos, const sf::Texture& tex)
     : Entity(pos)
@@ -45,19 +49,23 @@ void BreakableBox::takeDamage(float amount) {
 }
 
 void BreakableBox::onDeath() {
-    if (playerRef) {
-        int amount = moneyDropMin + (std::rand() % (moneyDropMax - moneyDropMin + 1));
-        playerRef->addMoney(amount);
-        std::cout << "[BreakableBox] Broken — dropped $" << amount << "\n";
+    if (!entityManagerRef) {
+        std::cout << "[BreakableBox] Broken — no EntityManager reference set\n";
+        return;
+    }
+
+    int roll = std::rand() % 100;   // 0-99
+
+    if (roll < 45) {
+        entityManagerRef->add(std::make_unique<HealthKit>(position, playerRef));
+    }
+    else if (roll < 75) {
+        int amount = 10 + (std::rand() % 21); // 10-30 tiền
+        entityManagerRef->add(std::make_unique<MoneyPickup>(position, playerRef, amount));
     }
     else {
-        // setPlayer() was never called at startup — box still breaks
-        // fine, it just can't hand out money. Not a crash, just no loot.
-        std::cout << "[BreakableBox] Broken — no player reference set, no loot given\n";
+        entityManagerRef->add(std::make_unique<ShieldPickup>(position, playerRef, 30.f));
     }
-    // NOTE: this grants money instantly on break. Once entities/pickups/
-    // (Person C) exists, swap this for spawning an actual Money pickup
-    // entity at `position` so the player has to walk over to collect it.
 }
 
 // ---- ExplodingBarrel ------------------------------------

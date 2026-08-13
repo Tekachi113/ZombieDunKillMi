@@ -212,7 +212,19 @@ sf::FloatRect Player::getBounds() const {
 void Player::addHealth(float amount) {
     health = std::min(health + amount, maxHealth);
 }
-
+void Player::addShield(float amount) {
+    shield = std::min(shield + amount, maxShield);
+}
+void Player::takeDamage(float amount) {
+    if (shield > 0.f) {
+        float absorbed = std::min(shield, amount);
+        shield -= absorbed;
+        amount -= absorbed;
+    }
+    if (amount > 0.f) {
+        Entity::takeDamage(amount);
+    }
+}
 
 void Player::setWeapons(std::vector<std::unique_ptr<Weapon>> loadout) {
     weapons = std::move(loadout);

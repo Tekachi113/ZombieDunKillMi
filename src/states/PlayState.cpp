@@ -67,6 +67,11 @@ PlayState::PlayState(Game& game)
 
 void PlayState::onEnter() {
     std::cout << "[PlayState] Entering play state\n";
+	if (initialized) {
+        return;
+        }
+    initialized = true;
+
 
     terrainTiles.clear();
  
@@ -176,6 +181,8 @@ void PlayState::onEnter() {
 
     Zombie::setTarget(&player);
     Zombie::setEntityManager(&entityManager);
+    BreakableBox::setEntityManager(&entityManager);
+    BreakableBox::setPlayer(&player);
 
     std::random_device rdDev;
     std::mt19937 g(rdDev());
@@ -372,7 +379,6 @@ void PlayState::onEnter() {
 
 void PlayState::onExit() {
     std::cout << "[PlayState] Exiting play state\n";
-    entityManager.clear();
 }
 
 

@@ -50,7 +50,10 @@ public:
     void addScore(int amount) { score += amount; }
     void addHealth(float amount);
     void addShield(float amount);
+    float getShield() const { return shield; }
+    float getMaxShield() const { return maxShield; }
     void setMoveSpeed(float speed) { moveSpeed = speed; }
+    void takeDamage(float amount) override;
 
     // --- Weapons ---------------------------------------------------
     // Give the player its starting loadout (or replace it wholesale,
@@ -107,6 +110,8 @@ private:
     // Stats
     int money = 0;
     int score = 0;
+    float shield = 0.f;
+    float maxShield = 100.f;
 
     // Weapons
     std::vector<std::unique_ptr<Weapon>> weapons;
