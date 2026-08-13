@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <random>
 #include <string>
+#include "entities/pickups/AmmoSpawner.h"
 
 // Helper: load all PNGs from a directory as a texture vector (sorted by filename)
 static std::vector<sf::Texture> loadFramesFromDir(const std::string& dir) {
@@ -526,6 +527,13 @@ void PlayState::update(float dt) {
     player.update(dt);
     hud.update(player);
     spawnManager.update(dt, entityManager, player);
+    ammoSpawner.update(dt,entityManager,
+        sf::FloatRect(
+            { 0.f, 0.f },
+            { mapPixelW(), mapPixelH() }
+        ),
+        &tileMap
+    );
     if (!player.isAlive())
     {
         game.getStateManager().changeState(

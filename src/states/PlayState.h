@@ -6,6 +6,7 @@
 #include "world/EntityManager.h"
 #include "world/CollisionSystem.h"
 #include "world/TileMap.h"
+#include "entities/pickups/AmmoSpawner.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 
@@ -27,6 +28,7 @@ private:
     EntityManager   entityManager;
     CollisionSystem collisionSystem;
     SpawnManager    spawnManager;
+    AmmoSpawner     ammoSpawner;
     // ---- Camera ----
     sf::View camera;
 
