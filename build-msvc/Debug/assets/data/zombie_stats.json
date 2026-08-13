@@ -1,0 +1,42 @@
+{
+  "zombies": {
+    "small": {
+      "displayName": "Small Zombie",
+      "hp":          40,
+      "speed":       90,
+      "damage":      8,
+      "attackRate":  1.0,
+      "xpReward":    10,
+      "moneyDrop":   { "min": 1, "max": 3 }
+    },
+    "medium": {
+      "displayName": "Medium Zombie",
+      "hp":          100,
+      "speed":       55,
+      "damage":      15,
+      "attackRate":  1.2,
+      "xpReward":    20,
+      "moneyDrop":   { "min": 2, "max": 5 }
+    },
+    "big": {
+      "displayName": "Big Zombie",
+      "hp":          280,
+      "speed":       30,
+      "damage":      35,
+      "attackRate":  2.0,
+      "xpReward":    50,
+      "moneyDrop":   { "min": 5, "max": 10 }
+    },
+    "turret": {
+      "displayName":      "Turret Zombie",
+      "hp":               150,
+      "speed":            10,
+      "damage":           12,
+      "attackRate":       2.5,
+      "projectileSpeed":  200,
+      "preferredRange":   250,
+      "xpReward":         35,
+      "moneyDrop":        { "min": 3, "max": 7 }
+    }
+  }
+}
