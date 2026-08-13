@@ -49,6 +49,7 @@ public:
     void addMoney(int amount) { money += amount; }
     void addScore(int amount) { score += amount; }
     void addHealth(float amount);
+    void addShield(float amount);
     void setMoveSpeed(float speed) { moveSpeed = speed; }
 
     // --- Weapons ---------------------------------------------------
