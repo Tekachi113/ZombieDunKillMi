@@ -4,3 +4,4 @@ __MACOSX/
 .vscode/
 .vs/
 *.exe
+build-msvc/ 

@@ -1,3 +1,0 @@
-C:/GameLTNC/build-msvc/CMakeFiles/ZombieDontKillMe.dir
-C:/GameLTNC/build-msvc/CMakeFiles/ALL_BUILD.dir
-C:/GameLTNC/build-msvc/CMakeFiles/ZERO_CHECK.dir
