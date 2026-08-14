@@ -129,7 +129,7 @@ void Player::handleInput(const InputManager& input, float dt) {
             currentDirection = pressingUp ? Direction::North : Direction::South;
         else if (horizontal)
             currentDirection = pressingLeft ? Direction::West : Direction::East;
-      
+
     }
    
 }

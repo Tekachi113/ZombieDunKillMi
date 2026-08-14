@@ -3,6 +3,7 @@
 #include "../../world/EntityManager.h"
 #include "../../world/TileMap.h"
 #include "../Projectile.h"
+#include "../Player.h"
 #include "../world_objects/WorldObjects.h"
 #include <iostream>
 #include <cmath>
@@ -256,9 +257,12 @@ void Zombie::attack(Entity& target) {
 
 void Zombie::onDeath() {
     std::cout << "[Zombie] Died at (" << position.x << ", " << position.y << ")\n";
+
     if (auto* player = dynamic_cast<Player*>(target)) {
-        player->addScore(xpReward);
         player->addMoney(moneyReward);
+        player->addScore(xpReward);
+        std::cout << "[Zombie] Player gained $" << moneyReward
+            << " and " << xpReward << " score\n";
     }
 }
 
