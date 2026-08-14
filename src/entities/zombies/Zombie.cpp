@@ -1,4 +1,5 @@
 #include "Zombie.h"
+#include "../Player.h"
 #include "../../world/EntityManager.h"
 #include "../../world/TileMap.h"
 #include "../Projectile.h"
@@ -255,6 +256,10 @@ void Zombie::attack(Entity& target) {
 
 void Zombie::onDeath() {
     std::cout << "[Zombie] Died at (" << position.x << ", " << position.y << ")\n";
+    if (auto* player = dynamic_cast<Player*>(target)) {
+        player->addScore(xpReward);
+        player->addMoney(moneyReward);
+    }
 }
 
 // ---- Subclasses -----------------------------------------

@@ -1,5 +1,6 @@
 #include "HealthKit.h"
 #include "../Player.h"
+#include <algorithm>
 
 HealthKit::HealthKit(sf::Vector2f pos, Player* player)
     : Entity(pos), playerRef(player)
@@ -16,6 +17,8 @@ void HealthKit::update(float dt)
 
     if (getBounds().findIntersection(playerRef->getBounds()))
     {
+        if (playerRef->getHealth() >= playerRef->getMaxHealth())
+            return;
         playerRef->addHealth(30.f);
         alive = false;
     }

@@ -37,7 +37,9 @@ bool HUD::load()
     hpFront.setSize({ 200.f, 16.f });
     hpFront.setPosition({ 10.f, 34.f });
     hpFront.setFillColor(sf::Color::Red);
-
+    hpText.emplace(font, "HP: 100 / 100", 18);
+    hpText->setPosition({ 220.f, 31.f });
+    hpText->setFillColor(sf::Color::White);
     return true;
 }
 void HUD::update(const Player& player)
@@ -66,6 +68,12 @@ void HUD::update(const Player& player)
         ammoText->setString("Ammo: - / -");
     }
 
+    hpText->setString(
+        "HP: " +
+        std::to_string(static_cast<int>(player.getHealth())) +
+        " / " +
+        std::to_string(static_cast<int>(player.getMaxHealth()))
+    );
     float pct = player.getHealth() / player.getMaxHealth();
 
     hpFront.setSize({ 200.f * pct, 16.f });
@@ -82,5 +90,6 @@ void HUD::render(sf::RenderTarget& target)
     if (ammoText) target.draw(*ammoText);
     target.draw(hpBack);
     target.draw(hpFront);
+    if (hpText) target.draw(*hpText);
 
 }

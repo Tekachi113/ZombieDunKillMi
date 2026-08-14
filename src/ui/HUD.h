@@ -23,7 +23,7 @@ private:
     std::optional<sf::Text> scoreText;
     std::optional<sf::Text> weaponText;
     std::optional<sf::Text> ammoText;
-
+    std::optional<sf::Text> hpText;
 
 
     sf::RectangleShape hpBack;
