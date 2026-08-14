@@ -543,7 +543,7 @@ void PlayState::update(float dt) {
     if (!player.isAlive())
     {
         game.getStateManager().changeState(
-            std::make_unique<GameOverState>(game));
+            std::make_unique<GameOverState>(game, player.getScore()));
         return;
     }
     entityManager.update(dt);
