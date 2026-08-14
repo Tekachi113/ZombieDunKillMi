@@ -1,4 +1,5 @@
 #include "core/Game.h"
+#include "core/AudioHelper.h"
 #include "states/MenuState.h"
 #include <iostream>
 
@@ -8,6 +9,8 @@ int main() {
         std::cout << "Starting up..." << std::endl;
 
         Game game;
+
+        AudioHelper::playMusic("assets/sounds/background_music.wav");
 
         // Start with the menu state
         game.getStateManager().pushState(std::make_unique<MenuState>(game));

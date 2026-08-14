@@ -1,6 +1,7 @@
 #include "ThrownGrenade.h"
 #include "../../world/EntityManager.h"
 #include "../../world/ParticleSystem.h"
+#include "../../core/AudioHelper.h"
 #include <cmath>
 
 ParticleSystem* ThrownGrenade::particlesRef = nullptr;
@@ -67,4 +68,6 @@ void ThrownGrenade::explode() {
     if (particlesRef) {
         particlesRef->emit(position, "explosion", 24);
     }
+
+    AudioHelper::playSfx("assets/sounds/grenade_explosion.wav");
 }

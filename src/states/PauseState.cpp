@@ -1,6 +1,7 @@
 #include "PauseState.h"
 #include "MenuState.h"
 #include "core/Game.h"
+#include "core/AudioHelper.h"
 
 PauseState::PauseState(Game& game)
     : GameState(game)
@@ -23,15 +24,20 @@ void PauseState::onEnter()
     resumeText->setCharacterSize(30);
     resumeText->setPosition({ 520.f, 280.f });
 
+    musicText.emplace(font);
+    musicText->setCharacterSize(30);
+    musicText->setPosition({ 520.f, 340.f });
+    updateMusicText();
+
     menuText.emplace(font);
     menuText->setString("Main Menu");
     menuText->setCharacterSize(30);
-    menuText->setPosition({ 520.f, 340.f });
+    menuText->setPosition({ 520.f, 400.f });
 
     quitText.emplace(font);
     quitText->setString("Quit");
     quitText->setCharacterSize(30);
-    quitText->setPosition({ 520.f, 400.f });
+    quitText->setPosition({ 520.f, 460.f });
 
     updateSelection();
 }
@@ -51,7 +57,7 @@ void PauseState::handleEvent(const sf::Event& event)
 
         case sf::Keyboard::Key::S:
         case sf::Keyboard::Key::Down:
-            if (selectedButton < 2)
+            if (selectedButton < 3)
                 selectedButton++;
             updateSelection();
             break;
@@ -66,11 +72,16 @@ void PauseState::handleEvent(const sf::Event& event)
             }
             else if (selectedButton == 1)
             {
+                AudioHelper::setMusicEnabled(!AudioHelper::isMusicEnabled());
+                updateMusicText();
+            }
+            else if (selectedButton == 2)
+            {
                 
                 game.getStateManager().changeState(
                     std::make_unique<MenuState>(game));
             }
-            else if (selectedButton == 2)
+            else if (selectedButton == 3)
             {
                 
                 game.getWindow().close();
@@ -99,6 +110,9 @@ void PauseState::render(sf::RenderTarget& target)
     if (resumeText)
         target.draw(*resumeText);
 
+    if (musicText)
+        target.draw(*musicText);
+
     if (menuText)
         target.draw(*menuText);
 
@@ -110,9 +124,18 @@ void PauseState::updateSelection()
     if (resumeText)
         resumeText->setFillColor(selectedButton == 0 ? sf::Color::Yellow : sf::Color::White);
 
+    if (musicText)
+        musicText->setFillColor(selectedButton == 1 ? sf::Color::Yellow : sf::Color::White);
+
     if (menuText)
-        menuText->setFillColor(selectedButton == 1 ? sf::Color::Yellow : sf::Color::White);
+        menuText->setFillColor(selectedButton == 2 ? sf::Color::Yellow : sf::Color::White);
 
     if (quitText)
-        quitText->setFillColor(selectedButton == 2 ? sf::Color::Yellow : sf::Color::White);
+        quitText->setFillColor(selectedButton == 3 ? sf::Color::Yellow : sf::Color::White);
+}
+
+void PauseState::updateMusicText()
+{
+    if (!musicText) return;
+    musicText->setString(AudioHelper::isMusicEnabled() ? "Music: ON" : "Music: OFF");
 }
