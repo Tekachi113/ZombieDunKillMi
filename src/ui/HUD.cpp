@@ -40,6 +40,18 @@ bool HUD::load()
     hpText.emplace(font, "HP: 100 / 100", 18);
     hpText->setPosition({ 220.f, 31.f });
     hpText->setFillColor(sf::Color::White);
+
+    shieldBack.setSize({ 200.f, 16.f });
+    shieldBack.setPosition({ 10.f, 55.f });
+    shieldBack.setFillColor(sf::Color(60, 60, 60));
+
+    shieldFront.setSize({ 200.f, 16.f });
+    shieldFront.setPosition({ 10.f, 55.f });
+    shieldFront.setFillColor(sf::Color::Blue);
+
+    shieldText.emplace(font, "Shield: 0 / 100", 18);
+    shieldText->setPosition({ 220.f, 52.f });
+    shieldText->setFillColor(sf::Color::White);
     return true;
 }
 void HUD::update(const Player& player)
@@ -77,6 +89,23 @@ void HUD::update(const Player& player)
     float pct = player.getHealth() / player.getMaxHealth();
 
     hpFront.setSize({ 200.f * pct, 16.f });
+    hpText->setString(
+        "HP: " +
+        std::to_string(static_cast<int>(player.getHealth())) +
+        " / " +
+        std::to_string(static_cast<int>(player.getMaxHealth()))
+    );
+
+    float shieldPct = player.getShield() / player.getMaxShield();
+
+    shieldFront.setSize({ 200.f * shieldPct, 16.f });
+
+    shieldText->setString(
+        "Shield: " +
+        std::to_string(static_cast<int>(player.getShield())) +
+        " / " +
+        std::to_string(static_cast<int>(player.getMaxShield()))
+    );
 }
 
 void HUD::render(sf::RenderTarget& target)
@@ -90,6 +119,14 @@ void HUD::render(sf::RenderTarget& target)
     if (ammoText) target.draw(*ammoText);
     target.draw(hpBack);
     target.draw(hpFront);
+    if (hpText)
+        target.draw(*hpText);
+
+    target.draw(shieldBack);
+    target.draw(shieldFront);
+
+    if (shieldText)
+        target.draw(*shieldText);
     if (hpText) target.draw(*hpText);
 
 }
