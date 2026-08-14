@@ -61,7 +61,7 @@ private:
     void buildMap();
     void buildVertices();
     void clampCamera();
-
+    bool initialized = false;
     float mapPixelW() const { return static_cast<float>(MAP_COLS * TILE_PX); }
     float mapPixelH() const { return static_cast<float>(MAP_ROWS * TILE_PX); }
 };

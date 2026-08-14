@@ -27,10 +27,11 @@ public:
     // wires PlayState needs to call this once, right next to the
     // existing Zombie::setTarget(&player) call.
     static void setPlayer(Player* p) { playerRef = p; }
-
+    static void setEntityManager(EntityManager* em) { entityManagerRef = em; }
 private:
     sf::Sprite sprite;
     static Player* playerRef;
+    static EntityManager* entityManagerRef;
 
     int moneyDropMin = 1;
     int moneyDropMax = 3;
