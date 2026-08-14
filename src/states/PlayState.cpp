@@ -498,7 +498,7 @@ void PlayState::handleEvent(const sf::Event& event)
     {
         if (key->code == sf::Keyboard::Key::Escape)
         {
-            game.getStateManager().changeState(
+            game.getStateManager().pushState(
                 std::make_unique<PauseState>(game));
         }
 
