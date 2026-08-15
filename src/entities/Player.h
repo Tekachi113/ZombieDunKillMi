@@ -49,6 +49,11 @@ public:
     void addMoney(int amount) { money += amount; }
     void addScore(int amount) { score += amount; }
     void addHealth(float amount);
+    void addShield(float amount);
+    float getShield() const { return shield; }
+    float getMaxShield() const { return maxShield; }
+    void setMoveSpeed(float speed) { moveSpeed = speed; }
+    void takeDamage(float amount) override;
 
     // --- Weapons ---------------------------------------------------
     // Give the player its starting loadout (or replace it wholesale,
@@ -64,6 +69,10 @@ public:
     Weapon* getCurrentWeapon();
     const Weapon* getCurrentWeapon() const;
     int           getCurrentWeaponSlot() const { return currentWeaponSlot; }
+
+    // Refills reserve ammo for every carried weapon that isn't melee
+    // (i.e. magazineSize > 0). Used by AmmoPickup on collection.
+    void refillAllAmmo(int amount);
 
     static constexpr int   WEAPON_SLOTS = 4;
     static constexpr float RADIUS = 12.f;
@@ -101,6 +110,8 @@ private:
     // Stats
     int money = 0;
     int score = 0;
+    float shield = 0.f;
+    float maxShield = 100.f;
 
     // Weapons
     std::vector<std::unique_ptr<Weapon>> weapons;

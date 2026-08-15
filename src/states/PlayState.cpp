@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <random>
 #include <string>
+#include "entities/pickups/AmmoSpawner.h"
 
 // Helper: load all PNGs from a directory as a texture vector (sorted by filename)
 static std::vector<sf::Texture> loadFramesFromDir(const std::string& dir) {
@@ -66,6 +67,11 @@ PlayState::PlayState(Game& game)
 
 void PlayState::onEnter() {
     std::cout << "[PlayState] Entering play state\n";
+	if (initialized) {
+        return;
+        }
+    initialized = true;
+
 
     terrainTiles.clear();
  
@@ -175,6 +181,8 @@ void PlayState::onEnter() {
 
     Zombie::setTarget(&player);
     Zombie::setEntityManager(&entityManager);
+    BreakableBox::setEntityManager(&entityManager);
+    BreakableBox::setPlayer(&player);
 
     std::random_device rdDev;
     std::mt19937 g(rdDev());
@@ -371,7 +379,6 @@ void PlayState::onEnter() {
 
 void PlayState::onExit() {
     std::cout << "[PlayState] Exiting play state\n";
-    entityManager.clear();
 }
 
 
@@ -491,7 +498,7 @@ void PlayState::handleEvent(const sf::Event& event)
     {
         if (key->code == sf::Keyboard::Key::Escape)
         {
-            game.getStateManager().changeState(
+            game.getStateManager().pushState(
                 std::make_unique<PauseState>(game));
         }
 
@@ -526,10 +533,17 @@ void PlayState::update(float dt) {
     player.update(dt);
     hud.update(player);
     spawnManager.update(dt, entityManager, player);
+    ammoSpawner.update(dt,entityManager,
+        sf::FloatRect(
+            { 0.f, 0.f },
+            { mapPixelW(), mapPixelH() }
+        ),
+        &tileMap
+    );
     if (!player.isAlive())
     {
         game.getStateManager().changeState(
-            std::make_unique<GameOverState>(game));
+            std::make_unique<GameOverState>(game, player.getScore()));
         return;
     }
     entityManager.update(dt);

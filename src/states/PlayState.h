@@ -6,6 +6,7 @@
 #include "world/EntityManager.h"
 #include "world/CollisionSystem.h"
 #include "world/TileMap.h"
+#include "entities/pickups/AmmoSpawner.h"
 #include <SFML/Graphics.hpp>
 #include <vector>
 
@@ -27,6 +28,7 @@ private:
     EntityManager   entityManager;
     CollisionSystem collisionSystem;
     SpawnManager    spawnManager;
+    AmmoSpawner     ammoSpawner;
     // ---- Camera ----
     sf::View camera;
 
@@ -59,7 +61,7 @@ private:
     void buildMap();
     void buildVertices();
     void clampCamera();
-
+    bool initialized = false;
     float mapPixelW() const { return static_cast<float>(MAP_COLS * TILE_PX); }
     float mapPixelH() const { return static_cast<float>(MAP_ROWS * TILE_PX); }
 };

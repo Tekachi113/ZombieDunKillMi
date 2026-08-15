@@ -129,7 +129,7 @@ void Player::handleInput(const InputManager& input, float dt) {
             currentDirection = pressingUp ? Direction::North : Direction::South;
         else if (horizontal)
             currentDirection = pressingLeft ? Direction::West : Direction::East;
-      
+
     }
    
 }
@@ -212,7 +212,19 @@ sf::FloatRect Player::getBounds() const {
 void Player::addHealth(float amount) {
     health = std::min(health + amount, maxHealth);
 }
-
+void Player::addShield(float amount) {
+    shield = std::min(shield + amount, maxShield);
+}
+void Player::takeDamage(float amount) {
+    if (shield > 0.f) {
+        float absorbed = std::min(shield, amount);
+        shield -= absorbed;
+        amount -= absorbed;
+    }
+    if (amount > 0.f) {
+        Entity::takeDamage(amount);
+    }
+}
 
 void Player::setWeapons(std::vector<std::unique_ptr<Weapon>> loadout) {
     weapons = std::move(loadout);
@@ -224,6 +236,16 @@ void Player::switchWeapon(int slotIndex) {
     slotIndex = std::clamp(slotIndex, 0, static_cast<int>(weapons.size()) - 1);
     if (!weapons[slotIndex]) return; // empty slot — ignore
     currentWeaponSlot = slotIndex;
+}
+
+void Player::refillAllAmmo(int amount) {
+    for (auto& w : weapons) {
+        // magazineSize <= 0 marks a weapon as melee/ammo-less (see
+        // Knife's constructor) -- skip those, refill everything else.
+        if (w && w->getMagazineSize() > 0) {
+            w->addReserveAmmo(amount);
+        }
+    }
 }
 
 Weapon* Player::getCurrentWeapon() {

@@ -2,6 +2,9 @@
 
 #include "../Entity.h"
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include <optional>
+#include <string>
 
 class EntityManager;
 // =========================================================
@@ -17,6 +20,7 @@ public:
 
     virtual void chase(sf::Vector2f targetPos, float dt);
     virtual void attack(Entity& target);
+    void takeDamage(float amount) override; // flashes the "damaged" animation briefly
     void onDeath() override;
 
     int getXpReward()    const { return xpReward; }
@@ -55,6 +59,25 @@ protected:
     static constexpr float AVOID_PROGRESS_MIN = 6.f;   // px expected to close in that time
 
     bool hasLineOfSight(sf::Vector2f from, sf::Vector2f to) const;
+
+    // ---- Visuals ----
+    // Loads assets/textures/zombies/<type>/walk_0.png, walk_1.png, ...
+    // (sequential, stops at the first missing file) and starts the loop
+    // animation. Falls back to a colored placeholder circle in render()
+    // if no frames were found, so the game never crashes over missing art.
+    void loadWalkAnimation(const std::string& type);
+    void updateAnimation(float dt); // advances frame + syncs sprite pos/facing
+
+    std::vector<sf::Texture>  walkFrames;
+    std::vector<sf::Texture>  damagedFrames; // hit-reaction, played briefly on takeDamage()
+    std::optional<sf::Sprite> sprite;
+    int   currentFrame = 0;
+    float animTimer    = 0.f;
+    float animSpeed    = 0.12f; // seconds per frame
+    float facing       = 1.f;   // +1 = facing right, -1 = flipped to face left
+
+    float damagedFlashTimer = 0.f; // > 0 while showing the damaged animation
+    static constexpr float DAMAGED_FLASH_DURATION = 0.35f;
 
     static Entity* target;
     static EntityManager* entityManagerRef;
