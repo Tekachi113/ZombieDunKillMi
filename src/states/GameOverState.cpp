@@ -3,8 +3,9 @@
 #include "PlayState.h"
 #include "core/Game.h"
 
-GameOverState::GameOverState(Game& game)
+GameOverState::GameOverState(Game& game, int finalScore)
     : GameState(game)
+    , finalScore(finalScore)
 {
 }
 
@@ -18,6 +19,12 @@ void GameOverState::onEnter()
     titleText->setCharacterSize(56);
     titleText->setFillColor(sf::Color::Red);
     titleText->setPosition({ 450.f, 150.f });
+    
+    scoreText.emplace(font);
+    scoreText->setString("Final Score: " + std::to_string(finalScore));
+    scoreText->setCharacterSize(30);
+    scoreText->setFillColor(sf::Color::White);
+    scoreText->setPosition({ 480.f, 220.f });
 
     retryText.emplace(font);
     retryText->setString("Retry");
@@ -87,6 +94,7 @@ void GameOverState::render(sf::RenderTarget& target)
     if (titleText) target.draw(*titleText);
     if (retryText) target.draw(*retryText);
     if (menuText) target.draw(*menuText);
+    if (scoreText) target.draw(*scoreText);
 }
 
 void GameOverState::updateSelection()

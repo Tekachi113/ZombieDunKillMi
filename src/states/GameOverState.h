@@ -7,7 +7,7 @@
 class GameOverState : public GameState
 {
 public:
-    explicit GameOverState(Game& game);
+    GameOverState(Game& game, int finalScore);
 
     void handleEvent(const sf::Event& event) override;
     void update(float dt) override;
@@ -20,6 +20,8 @@ private:
     std::optional<sf::Text> titleText;
     std::optional<sf::Text> retryText;
     std::optional<sf::Text> menuText;
+    std::optional<sf::Text> scoreText;
+    int finalScore = 0;
 
     int selectedButton = 0;
 

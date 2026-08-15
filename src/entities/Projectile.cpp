@@ -1,6 +1,7 @@
 #include "Projectile.h"
 #include <cmath>
 #include "zombies/Zombie.h"
+#include "../world/EntityManager.h"
 
 Projectile::Projectile(sf::Vector2f pos, sf::Vector2f dir,
                        float spd, float dmg, Entity* own)
@@ -15,16 +16,37 @@ void Projectile::update(float dt) {
     position += direction * speed * dt;
     lifetime -= dt;
     if (lifetime <= 0.f) { alive = false; return; }
-    
-    if (alive && owner && dynamic_cast<Zombie*>(owner)) {
+
+    if (!alive) return;
+
+    Zombie* ownerIsZombie = dynamic_cast<Zombie*>(owner);
+
+    if (ownerIsZombie) {
+        // --- Zombie projectile → hits player ---
         Entity* player = Zombie::getTarget();
         if (player && player->isAlive() && player != owner) {
             sf::Vector2f diff = player->getPosition() - position;
             float distSq = diff.x * diff.x + diff.y * diff.y;
-            const float hitRadius = RADIUS + 12.f; // rough player collision radius
+            const float hitRadius = RADIUS + 12.f;
             if (distSq <= hitRadius * hitRadius) {
                 player->takeDamage(damage);
                 onHit();
+            }
+        }
+    } else {
+        // --- Player projectile → hits zombies ---
+        EntityManager* em = Zombie::getEntityManager();
+        if (!em) return;
+
+        for (Zombie* z : em->getAllOf<Zombie>()) {
+            if (!z->isAlive()) continue;
+            sf::Vector2f diff = z->getPosition() - position;
+            float distSq = diff.x * diff.x + diff.y * diff.y;
+            const float hitRadius = RADIUS + 14.f; // zombie radius ~14px
+            if (distSq <= hitRadius * hitRadius) {
+                z->takeDamage(damage);
+                onHit();
+                if (!alive) return; // non-piercing: stop after first hit
             }
         }
     }

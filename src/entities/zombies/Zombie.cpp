@@ -1,4 +1,5 @@
 #include "Zombie.h"
+#include "../Player.h"
 #include "../../world/EntityManager.h"
 #include "../../world/TileMap.h"
 #include "../Projectile.h"

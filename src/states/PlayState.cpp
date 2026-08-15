@@ -498,7 +498,7 @@ void PlayState::handleEvent(const sf::Event& event)
     {
         if (key->code == sf::Keyboard::Key::Escape)
         {
-            game.getStateManager().changeState(
+            game.getStateManager().pushState(
                 std::make_unique<PauseState>(game));
         }
 
@@ -543,7 +543,7 @@ void PlayState::update(float dt) {
     if (!player.isAlive())
     {
         game.getStateManager().changeState(
-            std::make_unique<GameOverState>(game));
+            std::make_unique<GameOverState>(game, player.getScore()));
         return;
     }
     entityManager.update(dt);

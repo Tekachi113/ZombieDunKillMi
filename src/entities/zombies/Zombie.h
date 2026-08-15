@@ -31,7 +31,8 @@ public:
     // Set once at startup (same pattern as setTarget/setEntityManager)
     // so chase() can raycast against walls, not just other entities.
     static void setTileMap(const class TileMap* map) { tileMapRef = map; }
-    static Entity* getTarget() { return target; }
+    static Entity*        getTarget()        { return target; }
+    static EntityManager* getEntityManager() { return entityManagerRef; }
 
 protected:
     float moveSpeed;
