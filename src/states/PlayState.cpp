@@ -184,196 +184,47 @@ void PlayState::onEnter() {
     BreakableBox::setEntityManager(&entityManager);
     BreakableBox::setPlayer(&player);
 
-    std::random_device rdDev;
-    std::mt19937 g(rdDev());
     auto& rm2 = game.getResources();
 
-    // Helpers — place at explicit tile (col, row) centre
-    auto placeAt = [&](int col, int row, const std::string& key, bool collidable) {
-        if (!rm2.hasTexture(key)) return;
-        if (row < 0 || row >= MAP_ROWS || col < 0 || col >= MAP_COLS) return;
-        sf::Vector2f pos{(col + 0.5f) * TILE_PX, (row + 0.5f) * TILE_PX};
-        entityManager.add(std::make_unique<SceneryObject>(pos, rm2.getTexture(key), collidable));
-    };
-    auto placeVar = [&](int col, int row, const std::string& prefix, int maxV, bool collidable) {
-        std::vector<int> ok;
-        for (int v = 0; v < maxV; ++v)
-            if (rm2.hasTexture(prefix + std::to_string(v))) ok.push_back(v);
-        if (ok.empty()) return;
-        std::uniform_int_distribution<int> pick(0, (int)ok.size() - 1);
-        sf::Vector2f pos{(col + 0.5f) * TILE_PX, (row + 0.5f) * TILE_PX};
-        entityManager.add(std::make_unique<SceneryObject>(pos, rm2.getTexture(prefix + std::to_string(ok[pick(g)])), collidable));
-    };
-    auto placeAnim = [&](int col, int row, const std::string& dir, float speed, bool collidable) {
-        auto frames = loadFramesFromDir(dir);
-        if (frames.empty()) return;
-        sf::Vector2f pos{(col + 0.5f) * TILE_PX, (row + 0.5f) * TILE_PX};
-        entityManager.add(std::make_unique<AnimatedScenery>(pos, std::move(frames), speed, collidable));
-    };
-
-    // ================================================================
-    //  ZONE 1 — FARM (top-left, cols 1-19, rows 1-12)
-    // ================================================================
-    // Barn (large structure, top-centre of farm)
-    placeVar(7,  2, "barn_",    3, true);
-    placeVar(7,  5, "barn_",    3, true);
-    // Tractor parked near barn
-    placeVar(3,  5, "tractor_", 2, true);
-    // Windmill (animated) in farm yard
-    placeAnim(13, 7, "assets/textures/animated/windmill", 0.10f, true);
-    // Crop field (dense grid, rows 3-6, cols 10-18)
-    for (int r = 3; r <= 6; ++r)
-        for (int c = 10; c <= 17; ++c)
-            if ((r + c) % 2 == 0) placeVar(c, r, "crop_", 4, false);
-    // Grass patches in farm open area
-    for (int r = 7; r <= 11; ++r)
-        for (int c = 2; c <= 9; c += 2)
-            placeVar(c, r, "grass_", 4, false);
-    // Straw bales next to barn
-    placeVar(10, 2, "straw_", 2, false);
-    placeVar(11, 2, "straw_", 2, false);
-    // Fence rows along top and right of farm
-    for (int c = 1; c <= 18; ++c) placeVar(c,  1, "fence_", 3, true);
-    for (int r = 2; r <= 11; ++r) placeVar(18, r, "fence_", 3, true);
-    // Scarecrow in the crop field
-    placeVar(14, 4, "scarecrow_", 2, false);
-    // Trees lining the left edge of the farm
-    for (int r = 2; r <= 11; r += 2) placeVar(1, r, "tree_b_", 6, true);
-    // Birds near windmill
-    placeAnim(15, 6, "assets/textures/animated/bird_black", 0.08f, false);
-
-    // ================================================================
-    //  ZONE 2 — TOWN (top-right, cols 21-38, rows 1-12)
-    // ================================================================
-    // Gas station (top-left of town zone)
-    placeVar(22, 2, "gasstation_", 2, true);
-    placeVar(22, 5, "gasstation_", 2, true);
-    // Small buildings scattered
-    placeVar(27, 2, "bldg_sm_",   3, true);
-    placeVar(32, 2, "bldg_sm_",   3, true);
-    placeVar(36, 2, "bldg_bg_",   3, true);
-    placeVar(27, 6, "bldg_sm_",   3, true);
-    placeVar(33, 6, "bldg_bg_",   3, true);
-    // Urban clutter (fences, barrels, urban objects)
-    for (int c = 21; c <= 38; ++c) placeVar(c, 1, "fence_", 3, true);
-    placeVar(25,  4, "urban_", 6, true);
-    placeVar(26,  4, "urban_", 6, true);
-    placeVar(30,  4, "urban_", 6, true);
-    placeVar(31,  4, "urban_", 6, true);
-    placeVar(35,  8, "urban_", 6, true);
-    placeVar(36,  8, "urban_", 6, true);
-    // Exploding barrels near gas station
-    if (rm2.hasTexture("barrel")) {
-        entityManager.add(std::make_unique<ExplodingBarrel>(sf::Vector2f{25.5f * TILE_PX, 3.5f * TILE_PX}, rm2.getTexture("barrel")));
-        entityManager.add(std::make_unique<ExplodingBarrel>(sf::Vector2f{26.5f * TILE_PX, 3.5f * TILE_PX}, rm2.getTexture("barrel")));
-    }
-    // Trees lining town streets
-    for (int r = 2; r <= 11; r += 3) placeVar(38, r, "tree_b_", 6, true);
-    for (int c = 22; c <= 38; c += 4) placeVar(c, 10, "tree_b_", 6, true);
-    // Crates behind buildings
-    if (rm2.hasTexture("crate")) {
-        for (int c = 23; c <= 26; ++c)
-            entityManager.add(std::make_unique<BreakableBox>(sf::Vector2f{(c + 0.5f) * TILE_PX, 8.5f * TILE_PX}, rm2.getTexture("crate")));
-    }
-    // Road path markings on vertical divider (col 20)
-    for (int r = 2; r <= 11; ++r) placeVar(20, r, "path_", 6, false);
-
-    // ================================================================
-    //  ZONE 3 — ROAD (rows 13-15, full width)
-    // ================================================================
-    // Road tiles as non-collidable decoration on top of road terrain
-    for (int c = 2; c <= 38; c += 3) placeVar(c, 14, "road_", 6, false);
-    // Crosswalk areas: cols 8-10 and cols 28-30
-    for (int r = 13; r <= 15; ++r) {
-        placeVar( 9, r, "path_", 6, false);
-        placeVar(29, r, "path_", 6, false);
-    }
-    // Broken car on the road
-    placeVar(16, 14, "car_", 6, true);
-    placeVar(24, 14, "car_", 6, true);
-    // Truck blocking road
-    placeVar(33, 14, "truck_", 2, true);
-    // Tire / debris
-    placeVar(18, 14, "car_", 6, false);
-
-    // ================================================================
-    //  ZONE 4 — OPEN CENTRE (rows 16-21, cols 2-37 — player spawns here)
-    // ================================================================
-    // Sparse decoration so player has room to fight
-    placeVar( 5, 18, "tree_b_",    6, true);
-    placeVar(10, 19, "bush_b_",    6, true);
-    placeVar(15, 17, "tree_b_",    6, true);
-    placeVar(25, 18, "bush_b_",    6, true);
-    placeVar(30, 20, "tree_b_",    6, true);
-    placeVar(35, 17, "bush_b_",    6, true);
-    placeVar( 8, 20, "blood_stain_",5, false);
-    placeVar(22, 21, "blood_stain_",5, false);
-    placeAt (18, 19, "zombie_poster", false);
-    // A few crates for cover
-    if (rm2.hasTexture("crate")) {
-        for (int c : {6, 13, 20, 28, 34}) {
-            entityManager.add(std::make_unique<BreakableBox>(sf::Vector2f{(c + 0.5f) * TILE_PX, 21.5f * TILE_PX}, rm2.getTexture("crate")));
+    // ---- Simple scattered crates and barrels for cover ----
+    // Build a list of valid floor tile positions (away from the player spawn)
+    std::vector<sf::Vector2f> spawnPoints;
+    sf::Vector2f playerPos = player.getPosition();
+    for (int r = 2; r < MAP_ROWS - 2; ++r) {
+        for (int c = 2; c < MAP_COLS - 2; ++c) {
+            if (tileGrid[r][c] == -1) continue;
+            float px = (c + 0.5f) * TILE_PX;
+            float py = (r + 0.5f) * TILE_PX;
+            float dx = px - playerPos.x, dy = py - playerPos.y;
+            // Keep a clear circle around the player spawn
+            if (dx*dx + dy*dy < (TILE_PX * 4.f) * (TILE_PX * 4.f)) continue;
+            spawnPoints.push_back({px, py});
         }
     }
+    std::mt19937 g(42u); // fixed seed for reproducible layout
+    std::shuffle(spawnPoints.begin(), spawnPoints.end(), g);
+
+    std::size_t idx = 0;
+
+    // Crates
+    if (rm2.hasTexture("crate")) {
+        for (int i = 0; i < 30 && idx < spawnPoints.size(); ++i, ++idx)
+            entityManager.add(std::make_unique<BreakableBox>(spawnPoints[idx], rm2.getTexture("crate")));
+    }
+
+    // Exploding barrels
     if (rm2.hasTexture("barrel")) {
-        entityManager.add(std::make_unique<ExplodingBarrel>(sf::Vector2f{7.5f * TILE_PX, 21.5f * TILE_PX}, rm2.getTexture("barrel")));
-        entityManager.add(std::make_unique<ExplodingBarrel>(sf::Vector2f{32.5f * TILE_PX, 18.5f * TILE_PX}, rm2.getTexture("barrel")));
+        for (int i = 0; i < 10 && idx < spawnPoints.size(); ++i, ++idx)
+            entityManager.add(std::make_unique<ExplodingBarrel>(spawnPoints[idx], rm2.getTexture("barrel")));
     }
-
-    // ================================================================
-    //  ZONE 5 — FOREST EDGE (rows 22-28, full width)
-    // ================================================================
-    // Dense tree line
-    for (int r = 22; r <= 27; ++r)
-        for (int c = 1; c <= 38; c += 2)
-            placeVar(c, r, "tree_b_", 6, true);
-    // Bush undergrowth between trees
-    for (int r = 23; r <= 26; r += 2)
-        for (int c = 2; c <= 37; c += 3)
-            placeVar(c, r, "bush_b_", 6, true);
-    // Grass beneath the trees
-    for (int c = 2; c <= 37; c += 2)
-        placeVar(c, 28, "grass_", 4, false);
-    // Water pond in the forest
-    placeAnim(10, 25, "assets/textures/animated/water", 0.20f, false);
-    placeAnim(11, 25, "assets/textures/animated/water", 0.20f, false);
-    placeAnim(30, 24, "assets/textures/animated/water", 0.20f, false);
-    // Dead bird near the pond
-    placeAnim(12, 26, "assets/textures/animated/bird_black", 0.08f, false);
-
-    // ================================================================
-    //  ZONE 6 — GRAVEYARD (bottom-left corner, cols 1-10, rows 22-27)
-    // ================================================================
-    // Fence border
-    for (int c = 1; c <= 9; ++c) placeVar(c, 22, "fence_", 3, true);
-    for (int r = 23; r <= 27; ++r) placeVar(1, r, "fence_", 3, true);
-    // Tombstones
-    for (int r = 23; r <= 26; ++r)
-        for (int c = 2; c <= 8; c += 2)
-            placeAt(c, r, "tombstone", false);
-    // Blood stains
-    for (int c = 3; c <= 7; c += 2)
-        placeVar(c, 25, "blood_stain_", 5, false);
-
-    // ================================================================
-    //  ZONE 7 — GAS STATION ROAD JUNCTION (below town, cols 21-38 rows 16-21)
-    // ================================================================
-    placeVar(24, 17, "urban_", 6, true);
-    placeVar(24, 18, "urban_", 6, true);
-    placeVar(35, 20, "urban_", 6, true);
-    if (rm2.hasTexture("coke_can")) {
-        for (int c = 22; c <= 26; ++c)
-            entityManager.add(std::make_unique<BreakableBox>(sf::Vector2f{(c + 0.5f) * TILE_PX, 16.5f * TILE_PX}, rm2.getTexture("coke_can")));
-    }
-    // Bridge
-    placeVar(38, 19, "bridge_", 3, true);
-    // Music notes near (atmosphere)
-    placeAnim(36, 17, "assets/textures/animated/music_notes", 0.25f, false);
 
     std::cout << "[PlayState] Spawned " << entityManager.countTotal() << " world entities\n";
 
     hud.load();
 }
+
+
+
 
 
 
@@ -383,42 +234,22 @@ void PlayState::onExit() {
 
 
 void PlayState::buildMap() {
-    // Deterministic seed so the map looks the same each run
     std::srand(42);
 
-    // Start everything as floor tile variant 0
+    // Flat ground everywhere; only the border is a wall
     tileGrid.assign(MAP_ROWS, std::vector<int>(MAP_COLS, 0));
 
     int variants = terrainTiles.empty() ? 1 : static_cast<int>(terrainTiles.size());
 
     for (int r = 0; r < MAP_ROWS; ++r) {
         for (int c = 0; c < MAP_COLS; ++c) {
-            // Border = wall
             if (r == 0 || r == MAP_ROWS - 1 || c == 0 || c == MAP_COLS - 1) {
-                tileGrid[r][c] = -1;
-                continue;
+                tileGrid[r][c] = -1; // border wall
+            } else {
+                // Light terrain variation
+                tileGrid[r][c] = (std::rand() % 10 < 7) ? 0
+                               : (std::rand() % variants);
             }
-
-            // --- Road strip: rows 13-15 (horizontal road through middle) ---
-            if (r >= 13 && r <= 15) {
-                tileGrid[r][c] = 1;   // darker variant = road look
-                continue;
-            }
-
-            // --- Path tiles: light paths connecting zones ---
-            // Vertical path col 20 (farm-to-town divider)
-            if (c == 20 && r >= 1 && r <= 12) {
-                tileGrid[r][c] = 2;
-                continue;
-            }
-            // Vertical path col 20 below road
-            if (c == 20 && r >= 16 && r <= MAP_ROWS - 2) {
-                tileGrid[r][c] = 2;
-                continue;
-            }
-
-            // --- Terrain variation: mostly variant 0, occasional 1-3 ---
-            tileGrid[r][c] = (std::rand() % 8 < 6) ? 0 : (1 + std::rand() % (variants - 1 > 0 ? variants - 1 : 1));
         }
     }
 }

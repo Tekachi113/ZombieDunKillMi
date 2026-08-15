@@ -23,9 +23,7 @@ bool WeaponFactory::loadConfig(const std::string& path, bool forceReload) {
         return false;
     }
 
-    try {
-        file >> g_config;
-    }
+    try { file >> g_config; }
     catch (const std::exception& e) {
         std::cerr << "[WeaponFactory] JSON error: " << e.what() << "\n";
         return false;
@@ -45,17 +43,24 @@ std::unique_ptr<Weapon> WeaponFactory::create(const std::string& type) {
     }
 
     const auto& w = g_config["weapons"][type];
+    std::unique_ptr<Weapon> wep;
 
     if (type == "knife") {
-        return std::make_unique<Knife>(
+        wep = std::make_unique<Knife>(
             w.value("damage", 40.f),
             w.value("attackRate", 2.0f),
             w.value("range", 60.f),
             w.value("swingArc", 90.f));
+        // Knife: item_10 idle, item_10/11/12 attack animation
+        wep->loadTexture("assets/textures/pickups/weapons/item_10.png");
+        wep->loadAttackFrames({
+            "assets/textures/pickups/weapons/item_10.png",
+            "assets/textures/pickups/weapons/item_11.png",
+            "assets/textures/pickups/weapons/item_12.png"
+        });
     }
-
-    if (type == "pistol") {
-        return std::make_unique<Pistol>(
+    else if (type == "pistol") {
+        wep = std::make_unique<Pistol>(
             w.value("damage", 25.f),
             w.value("fireRate", 2.5f),
             w.value("projectileSpeed", 500.f),
@@ -64,10 +69,10 @@ std::unique_ptr<Weapon> WeaponFactory::create(const std::string& type) {
             w.value("reserveAmmo", 48),
             w.value("reloadTime", 1.2f),
             ammoTypeFromString(w.value("ammoType", std::string("small"))));
+        wep->loadTexture("assets/textures/pickups/weapons/item_7.png");
     }
-
-    if (type == "shotgun") {
-        return std::make_unique<Shotgun>(
+    else if (type == "shotgun") {
+        wep = std::make_unique<Shotgun>(
             w.value("damage", 18.f),
             w.value("fireRate", 0.8f),
             w.value("projectileSpeed", 450.f),
@@ -77,12 +82,12 @@ std::unique_ptr<Weapon> WeaponFactory::create(const std::string& type) {
             w.value("reserveAmmo", 24),
             w.value("reloadTime", 2.0f),
             ammoTypeFromString(w.value("ammoType", std::string("medium"))));
+        wep->loadTexture("assets/textures/pickups/weapons/item_4.png");
     }
-
-    if (type == "grenade") {
-        return std::make_unique<Grenade>(
+    else if (type == "grenade") {
+        wep = std::make_unique<Grenade>(
             w.value("damage", 120.f),
-            w.value("fireRate", 1.0f), // not present in JSON — one throw per second by default
+            w.value("fireRate", 1.0f),
             w.value("throwSpeed", 400.f),
             w.value("fuseTime", 2.0f),
             w.value("blastRadius", 100.f),
@@ -90,10 +95,14 @@ std::unique_ptr<Weapon> WeaponFactory::create(const std::string& type) {
             w.value("reserveAmmo", 3),
             w.value("reloadTime", 0.5f),
             ammoTypeFromString(w.value("ammoType", std::string("big"))));
+        wep->loadTexture("assets/textures/pickups/weapons/item_3.png");
+    }
+    else {
+        std::cerr << "[WeaponFactory] No factory case for weapon type: " << type << "\n";
+        return nullptr;
     }
 
-    std::cerr << "[WeaponFactory] No factory case for weapon type: " << type << "\n";
-    return nullptr;
+    return wep;
 }
 
 std::vector<std::unique_ptr<Weapon>> WeaponFactory::createDefaultLoadout() {

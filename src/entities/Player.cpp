@@ -175,6 +175,18 @@ void Player::render(sf::RenderTarget& target) {
         target.draw(*sprite);
     else
         renderPlaceholder(target);
+
+    // Draw the currently equipped weapon in the player's hand
+    if (const Weapon* w = getCurrentWeapon(); w && w->hasSprite()) {
+        // Offset from player centre toward aim direction — hand position
+        const float handDist = RADIUS + 6.f;
+        sf::Vector2f handPos = position + aimDir * handDist;
+
+        // Compute angle in degrees from aimDir (SFML: 0 = right)
+        float angleDeg = std::atan2(aimDir.y, aimDir.x) * 180.f / 3.14159265f;
+
+        w->drawAt(target, handPos, angleDeg, 3.f);
+    }
 }
 
 void Player::renderPlaceholder(sf::RenderTarget& target) {
@@ -234,7 +246,7 @@ void Player::setWeapons(std::vector<std::unique_ptr<Weapon>> loadout) {
 void Player::switchWeapon(int slotIndex) {
     if (weapons.empty()) return;
     slotIndex = std::clamp(slotIndex, 0, static_cast<int>(weapons.size()) - 1);
-    if (!weapons[slotIndex]) return; // empty slot — ignore
+    if (!weapons[slotIndex]) return; // empty slot â€” ignore
     currentWeaponSlot = slotIndex;
 }
 

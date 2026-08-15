@@ -5,12 +5,10 @@
 #include <algorithm>
 
 Knife::Knife(float damage, float attackRate, float rng, float arcDeg)
-    : Weapon("Knife", damage, attackRate, /*magazineSize=*/0, /*reserveAmmo=*/0,
-        /*reloadTime=*/0.f, /*spread=*/0.f, AmmoType::None)
+    : Weapon("Knife", damage, attackRate, 0, 0, 0.f, 0.f, AmmoType::None)
     , range(rng)
     , swingArcDeg(arcDeg)
-{
-}
+{}
 
 void Knife::fire(Entity& owner, sf::Vector2f origin, sf::Vector2f direction,
     EntityManager& entities) {
@@ -25,19 +23,16 @@ void Knife::fire(Entity& owner, sf::Vector2f origin, sf::Vector2f direction,
 
         sf::Vector2f toTarget = target->getPosition() - origin;
         float dist = std::sqrt(toTarget.x * toTarget.x + toTarget.y * toTarget.y);
-        if (dist < 0.001f) {
-            target->takeDamage(damage); // right on top of us — always hits
-            continue;
-        }
+        if (dist < 0.001f) { target->takeDamage(damage); continue; }
 
         sf::Vector2f toTargetDir = toTarget / dist;
         float dot = std::clamp(aimDir.x * toTargetDir.x + aimDir.y * toTargetDir.y, -1.f, 1.f);
         float angleDeg = std::acos(dot) * 180.f / 3.14159265f;
 
-        if (angleDeg <= halfArc) {
+        if (angleDeg <= halfArc)
             target->takeDamage(damage);
-        }
     }
 
+    triggerAttackAnim(); // play item_10 -> item_11 -> item_12
     consumeShot();
 }
