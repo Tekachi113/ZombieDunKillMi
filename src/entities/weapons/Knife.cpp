@@ -1,6 +1,7 @@
 #include "Knife.h"
 #include "../Entity.h"
 #include "../../world/EntityManager.h"
+#include "../../core/AudioHelper.h"
 #include <cmath>
 #include <algorithm>
 
@@ -35,4 +36,5 @@ void Knife::fire(Entity& owner, sf::Vector2f origin, sf::Vector2f direction,
 
     triggerAttackAnim(); // play item_10 -> item_11 -> item_12
     consumeShot();
+    AudioHelper::playSfx("assets/sounds/knife_swing.wav", 60.f);
 }

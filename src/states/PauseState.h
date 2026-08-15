@@ -19,10 +19,12 @@ private:
 
     std::optional<sf::Text> titleText;
     std::optional<sf::Text> resumeText;
+    std::optional<sf::Text> musicText;
     std::optional<sf::Text> menuText;
     std::optional<sf::Text> quitText;
 
     int selectedButton = 0;
 
     void updateSelection();
+    void updateMusicText(); // refreshes the "Music: ON/OFF" label
 };

@@ -2,6 +2,7 @@
 #include "../Entity.h"
 #include "../Projectile.h"
 #include "../../world/EntityManager.h"
+#include "../../core/AudioHelper.h"
 #include <memory>
 #include <cmath>
 
@@ -21,6 +22,7 @@ void Pistol::fire(Entity& owner, sf::Vector2f origin, sf::Vector2f direction,
     sf::Vector2f shotDir = applySpread(aimDir, spread);
 
     entities.add(std::make_unique<Projectile>(origin, shotDir, projectileSpeed, damage, &owner));
+    AudioHelper::playSfx("assets/sounds/pistol_shot.wav");
 
     consumeShot();
     autoReloadIfEmpty();

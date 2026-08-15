@@ -2,6 +2,7 @@
 #include "ThrownGrenade.h"
 #include "../Entity.h"
 #include "../../world/EntityManager.h"
+#include "../../core/AudioHelper.h"
 #include <memory>
 
 Grenade::Grenade(float dmg, float rate, float thrwSpeed,
@@ -20,6 +21,7 @@ void Grenade::fire(Entity& owner, sf::Vector2f origin, sf::Vector2f direction,
 
     entities.add(std::make_unique<ThrownGrenade>(
         origin, direction, throwSpeed, fuseTime, blastRadius, damage, entities, &owner));
+    AudioHelper::playSfx("assets/sounds/grenade_throw.wav", 70.f);
 
     consumeShot();
 }

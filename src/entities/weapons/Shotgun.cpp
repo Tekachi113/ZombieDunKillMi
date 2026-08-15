@@ -2,6 +2,7 @@
 #include "../Entity.h"
 #include "../Projectile.h"
 #include "../../world/EntityManager.h"
+#include "../../core/AudioHelper.h"
 #include <memory>
 #include <cmath>
 
@@ -28,5 +29,6 @@ void Shotgun::fire(Entity& owner, sf::Vector2f origin, sf::Vector2f direction,
     }
 
     consumeShot(); // consumes 1 shell, not 1 per pellet
+    AudioHelper::playSfx("assets/sounds/shotgun_shot.wav");
     autoReloadIfEmpty();
 }
