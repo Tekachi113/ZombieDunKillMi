@@ -15,42 +15,47 @@ bool HUD::load()
     pauseHint->setPosition({ 10.f, 10.f });
     pauseHint->setFillColor(sf::Color::White);
 
+    // Layout, top to bottom, each row spaced far enough apart that
+    // nothing overlaps: pause hint -> HP bar -> Shield bar -> money ->
+    // score -> weapon -> ammo. Previously moneyText sat at y=60, right
+    // on top of the shield bar (y=55-71) -- everything below is now
+    // pushed down clear of both bars.
     moneyText.emplace(font, "", 18);
-    moneyText->setPosition({ 10.f, 60.f });
+    moneyText->setPosition({ 10.f, 90.f });
     moneyText->setFillColor(sf::Color::White);
 
     scoreText.emplace(font, "", 18);
-    scoreText->setPosition({ 10.f, 85.f });
+    scoreText->setPosition({ 10.f, 115.f });
     scoreText->setFillColor(sf::Color::White);
     weaponText.emplace(font, "Weapon: -", 18);
-    weaponText->setPosition({ 10.f, 110.f });
+    weaponText->setPosition({ 10.f, 140.f });
     weaponText->setFillColor(sf::Color::White);
 
     ammoText.emplace(font, "Ammo: - / -", 18);
-    ammoText->setPosition({ 10.f, 135.f });
+    ammoText->setPosition({ 10.f, 165.f });
     ammoText->setFillColor(sf::Color::White);
 
     hpBack.setSize({ 200.f, 16.f });
-    hpBack.setPosition({ 10.f, 34.f });
+    hpBack.setPosition({ 10.f, 40.f });
     hpBack.setFillColor(sf::Color(60, 60, 60));
 
     hpFront.setSize({ 200.f, 16.f });
-    hpFront.setPosition({ 10.f, 34.f });
+    hpFront.setPosition({ 10.f, 40.f });
     hpFront.setFillColor(sf::Color::Red);
     hpText.emplace(font, "HP: 100 / 100", 18);
-    hpText->setPosition({ 220.f, 31.f });
+    hpText->setPosition({ 220.f, 37.f });
     hpText->setFillColor(sf::Color::White);
 
     shieldBack.setSize({ 200.f, 16.f });
-    shieldBack.setPosition({ 10.f, 55.f });
+    shieldBack.setPosition({ 10.f, 65.f });
     shieldBack.setFillColor(sf::Color(60, 60, 60));
 
     shieldFront.setSize({ 200.f, 16.f });
-    shieldFront.setPosition({ 10.f, 55.f });
+    shieldFront.setPosition({ 10.f, 65.f });
     shieldFront.setFillColor(sf::Color::Blue);
 
     shieldText.emplace(font, "Shield: 0 / 100", 18);
-    shieldText->setPosition({ 220.f, 52.f });
+    shieldText->setPosition({ 220.f, 62.f });
     shieldText->setFillColor(sf::Color::White);
     return true;
 }

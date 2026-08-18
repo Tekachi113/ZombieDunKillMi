@@ -2,6 +2,7 @@
 
 #include <SFML/Graphics.hpp>
 #include "../Entity.h"
+#include <optional>
 
 class Player;
 
@@ -15,6 +16,13 @@ public:
     sf::FloatRect getBounds() const override;
 
 private:
-    sf::RectangleShape shape;
+    sf::RectangleShape shape; // fallback if texture is missing
+
+    // assets/textures/pickups/hp.png -- placeholder art, swap the file
+    // for real art later, no code changes needed.
+    sf::Texture texture;
+    std::optional<sf::Sprite> sprite;
+    bool hasTexture = false;
+
     Player* playerRef;
 };

@@ -2,6 +2,7 @@
 
 #include "../Entity.h"
 #include <SFML/Graphics.hpp>
+#include <optional>
 
 // A world pickup that refills reserve ammo for every non-melee weapon
 // the player is carrying when walked over. Spawned periodically and
@@ -24,6 +25,13 @@ public:
 private:
     int refillAmount;
     float bobTimer = 0.f; // small up/down bob, purely visual polish
+
+    // assets/textures/pickups/ammo.png -- placeholder art (swap the
+    // file whenever real art is ready, no code changes needed). Falls
+    // back to the colored diamond shape if the file is missing.
+    sf::Texture texture;
+    std::optional<sf::Sprite> sprite;
+    bool hasTexture = false;
 
     static constexpr float RADIUS = 10.f;
 };
