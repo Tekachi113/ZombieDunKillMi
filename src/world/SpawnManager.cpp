@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <nlohmann/json.hpp>
+#include <algorithm>
 
 bool SpawnManager::loadWaveConfig(const std::string& path) {
     std::ifstream file(path);
@@ -151,20 +152,22 @@ sf::Vector2f SpawnManager::randomSpawnPos(const Player& /*player*/) const {
     // gets stuck off-screen forever. Keeping spawns inside spawnBounds
     // avoids that trap while still spawning at the edges (far from
     // wherever the player currently is).
-    const float margin = 40.f; // inset from the edge, not outset
+    const float margin = 80.f; // inset from the edge, not outset
 
     float rw = spawnBounds.size.x;
     float rh = spawnBounds.size.y;
     float rx = spawnBounds.position.x;
     float ry = spawnBounds.position.y;
+	float alongW = std::max(1.f, rw - 2.f * margin);
+	float alongH = std::max(1.f, rh - 2.f * margin);
 
     int edge = std::rand() % 4;
     sf::Vector2f pos;
     switch (edge) {
-    case 0: pos = { rx + static_cast<float>(std::rand() % static_cast<int>(rw)), ry + margin }; break;          // top
-    case 1: pos = { rx + static_cast<float>(std::rand() % static_cast<int>(rw)), ry + rh - margin }; break;     // bottom
-    case 2: pos = { rx + margin, ry + static_cast<float>(std::rand() % static_cast<int>(rh)) }; break;          // left
-    case 3: pos = { rx + rw - margin, ry + static_cast<float>(std::rand() % static_cast<int>(rh)) }; break;     // right
+    case 0: pos = { rx + margin + static_cast<float>(std::rand() % static_cast<int>(alongW)), ry + margin }; break;          // top
+    case 1: pos = { rx + margin +static_cast<float>(std::rand() % static_cast<int>(alongW)), ry + rh - margin }; break;     // bottom
+    case 2: pos = { rx + margin, ry + static_cast<float>(std::rand() % static_cast<int>(alongH)) }; break;          // left
+    case 3: pos = { rx + rw - margin, ry + static_cast<float>(std::rand() % static_cast<int>(alongH)) }; break;     // right
     }
 
     return pos;
